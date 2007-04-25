@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    <bean id="indexController" class="com.fatwire.cs.spring.controllers.IndexController" />
+    <bean id="reporterController" class="com.fatwire.cs.spring.controllers.ReporterController" />
+    <bean id="monitorController" class="com.fatwire.cs.spring.controllers.MonitorController">
+        <property name="monitor" ref="monitorListener"/>
+    </bean>
+    <bean id="log4jController" class="com.fatwire.cs.spring.controllers.Log4jController" />
+    <bean id="ftTimedHashtableController" class="com.fatwire.cs.spring.controllers.FTTimedHashtableController" />
+    <bean id="memoryDumpController" class="com.fatwire.cs.spring.controllers.MemoryDumpController" />
+    <bean id="threadDumpController" class="com.fatwire.cs.spring.controllers.ThreadDumpController" />
+    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <props>
+                <prop key="/index.html">indexController</prop>
+                <prop key="/">indexController</prop>
+                <prop key="/reporter">reporterController</prop>
+                <prop key="/log4j">log4jController</prop>
+                <prop key="/cache">ftTimedHashtableController</prop>
+                <prop key="/memorydump">memoryDumpController</prop>
+                <prop key="/threaddump">threadDumpController</prop>
+                <prop key="/monitor">monitorController</prop>
+
+            </props>
+        </property>
+    </bean>
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass">
+            <value>org.springframework.web.servlet.view.JstlView</value>
+        </property>
+        <property name="prefix">
+            <value>/WEB-INF/jsp/</value>
+        </property>
+        <property name="suffix">
+            <value>.jsp</value>
+        </property>
+    </bean>
+</beans>

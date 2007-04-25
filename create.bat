@@ -1,0 +1,1 @@
+mvn archetype:create -DarchetypeGroupId=com.webtide -DarchetypeArtifactId=maven-archetype-Spring -DarchetypeVersion=1.0-SNAPSHOT -DgroupId=com.fatwire -DartifactId=sample 
