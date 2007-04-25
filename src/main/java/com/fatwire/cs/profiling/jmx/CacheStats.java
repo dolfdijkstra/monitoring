@@ -1,0 +1,87 @@
+package com.fatwire.cs.profiling.jmx;
+
+import java.io.IOException;
+import java.util.Date;
+
+import COM.FutureTense.Util.ftTimedHashtable;
+
+import com.fatwire.cs.core.cache.RuntimeCacheStats;
+
+public class CacheStats implements CacheStatsMBean {
+    final String hashName;
+
+    /**
+     * @param delegate
+     */
+    public CacheStats(final String hashName) {
+        super();
+        this.hashName = hashName;
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getClearCount()
+     */
+    public long getClearCount() throws IOException {
+        return getDelegate().getClearCount();
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getCreatedDate()
+     */
+    public Date getCreatedDate() throws IOException {
+        return getDelegate().getCreatedDate();
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getHits()
+     */
+    public long getHits() throws IOException {
+        return getDelegate().getHits();
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getLastFlushedDate()
+     */
+    public Date getLastFlushedDate() throws IOException {
+        return getDelegate().getLastFlushedDate();
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getLastPrunedDate()
+     */
+    public Date getLastPrunedDate() throws IOException {
+        return getDelegate().getLastPrunedDate();
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getMisses()
+     */
+    public long getMisses() throws IOException {
+        return getDelegate().getMisses();
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getRemoveCount()
+     */
+    public long getRemoveCount() throws IOException {
+        return getDelegate().getRemoveCount();
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#hasINotifyObjects()
+     */
+    public boolean hasINotifyObjects() throws IOException {
+        return getDelegate().hasINotifyObjects();
+    }
+
+    private RuntimeCacheStats getDelegate() {
+        //TODO figure out how long this can be cached.
+        final ftTimedHashtable ftTh = ftTimedHashtable.findHash(hashName);
+        if (ftTh == null) {
+            return new NullRuntimeCacheStats();
+        }
+
+        return ftTh.getRuntimeStats();
+    }
+
+}
