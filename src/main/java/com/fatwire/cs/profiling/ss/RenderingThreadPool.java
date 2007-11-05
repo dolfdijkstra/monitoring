@@ -14,8 +14,8 @@ public class RenderingThreadPool extends ThreadPoolExecutor {
 
     private final Set<FinishedListener> listeners = new CopyOnWriteArraySet<FinishedListener>();
 
-    public RenderingThreadPool(LinkedBlockingQueue<Runnable> workQueue) {
-        super(10, 20, 60, TimeUnit.SECONDS, workQueue);
+    public RenderingThreadPool() {
+        super(10, 20, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     }
 
@@ -24,7 +24,7 @@ public class RenderingThreadPool extends ThreadPoolExecutor {
      */
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
-        log.debug(this.getActiveCount() + " " + getQueue().size());
+        log.debug("afterExecute: " +this.getActiveCount() + " " + getQueue().size());
         if (this.getActiveCount() == 1 && getQueue().size() == 0) {
             for (FinishedListener listener : listeners) {
                 listener.finished();

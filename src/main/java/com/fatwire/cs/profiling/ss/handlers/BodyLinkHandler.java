@@ -1,6 +1,5 @@
 package com.fatwire.cs.profiling.ss.handlers;
 
-import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,13 +34,9 @@ public class BodyLinkHandler extends AbstractBodyHandler {
 
     void doLink(final String link) {
         log.trace(link);
-        try {
-            SSUri map = uriHelper.linkToMap(link);
-            if (map.isOK()) {
-                addLink(map);
-            }
-        } catch (final URISyntaxException e) {
-            log.error(e);
+        SSUri map = uriHelper.linkToMap(link);
+        if (map.isOK()) {
+            addLink(map);
         }
     }
 }

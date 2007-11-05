@@ -41,22 +41,20 @@ public class URLReaderService {
 
     private final Set<PageletRenderingListener> listeners = new CopyOnWriteArraySet<PageletRenderingListener>();
 
-    private final List<String> startUrls;
+    private final List<String> startUrls = new ArrayList<String>();
 
     private final Scheduler scheduler;
 
     /**
      * @param urlsToDo
      */
-    public URLReaderService(final List<String> urlsToDo,
-            final ThreadPoolExecutor readerPool) {
+    public URLReaderService(final ThreadPoolExecutor readerPool) {
         super();
-        this.startUrls = urlsToDo;
         scheduler = new Scheduler(readerPool);
 
     }
 
-    void initClient() {
+    protected void initClient() {
         client = new HttpClient(new MultiThreadedHttpConnectionManager());
         client.getHttpConnectionManager().getParams().setConnectionTimeout(
                 30000);
@@ -79,19 +77,19 @@ public class URLReaderService {
 
     public void start() {
         initClient();
-        final List<String> initialToDo = new ArrayList<String>(startUrls);
 
-        for (final String thingToDo : initialToDo) {
-            scheduler.schedulePage(thingToDo);
+        for (final String thingToDo : startUrls) {
+
+            scheduler.schedulePage(uriHelper.linkToMap(thingToDo));
         }
         scheduler.waitForlAllTasksToFinish();
 
     }
 
     class Scheduler {
-        private final List<String> urlsToDo = new ArrayList<String>();
+        private final List<SSUri> urlsToDo = new ArrayList<SSUri>();
 
-        private final Set<String> urlsDone = new HashSet<String>();
+        private final Set<SSUri> urlsDone = new HashSet<SSUri>();
 
         private final ThreadPoolExecutor readerPool;
 
@@ -107,20 +105,17 @@ public class URLReaderService {
             this.readerPool = readerPool;
         }
 
-        void schedulePage(final String uriToDo) {
+        void schedulePage(final SSUri uriToDo) {
             if (count++ > maxPages) {
                 return;
             }
+            urlsDone.add(uriToDo);
             String uri = checkUri(uriToDo);
-            urlsDone.add(uri);
+
             final UrlRenderingCallable downloader = new UrlRenderingCallable(
                     client, uri, uriHelper);
 
             try {
-                //                final FutureTask<ResultPage> ft = new FutureTask<ResultPage>(
-                //                        downloader);
-                //                readerPool.submit(ft);
-                //readerPool.submit(new CollectorTask(ft));
                 readerPool.execute(new Harvester(downloader));
 
             } catch (final Exception e) {
@@ -129,7 +124,8 @@ public class URLReaderService {
 
         }
 
-        String checkUri(String uri) {
+        String checkUri(SSUri ssuri) {
+            String uri = uriHelper.toLink(ssuri);
             if (uri.indexOf(HelperStrings.SS_PAGEDATA_REQUEST) == -1) {
                 return uri + HelperStrings.SS_PAGEDATA_REQUEST + "=true";
             }
@@ -139,21 +135,25 @@ public class URLReaderService {
         void pageComplete(final ResultPage page) {
 
             for (final SSUri ssUri : page.getMarkers()) {
-                String url = uriHelper.toLink(ssUri);
-                if (!urlsDone.contains(url) && !urlsToDo.contains(url)) {
-                    log.debug("adding " + url);
-                    schedulePage(url);
+
+                if (!urlsDone.contains(ssUri) && !urlsToDo.contains(ssUri)) {
+                    if (log.isDebugEnabled()) {
+                        String url = uriHelper.toLink(ssUri);
+                        log.debug("adding " + url);
+                    }
+                    schedulePage(ssUri);
                 }
             }
             for (final SSUri ssUri : page.getLinks()) {
-                String url = uriHelper.toLink(ssUri);
-                if (!urlsDone.contains(url) && !urlsToDo.contains(url)) {
-                    log.debug("adding " + url);
-                    schedulePage(url);
+                if (!urlsDone.contains(ssUri) && !urlsToDo.contains(ssUri)) {
+                    if (log.isDebugEnabled()) {
+                        String url = uriHelper.toLink(ssUri);
+                        log.debug("adding " + url);
+                    }
+                    schedulePage(ssUri);
                 }
             }
-            final PageletRenderedEvent event = new PageletRenderedEvent(this,
-                    page);
+            final PageletRenderedEvent event = new PageletRenderedEvent(page);
             for (final PageletRenderingListener listener : listeners) {
                 listener.renderPerformed(event);
             }
@@ -279,6 +279,10 @@ public class URLReaderService {
         this.hostConfig = hostConfig;
         this.uriHelper = new SSUriHelper(hostConfig.getDomain());
 
+    }
+
+    public void addStartUri(String uri) {
+        this.startUrls.add(uri);
     }
 
 }
