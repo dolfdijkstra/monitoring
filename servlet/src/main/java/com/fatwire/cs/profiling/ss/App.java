@@ -26,13 +26,24 @@ public class App {
      * @param args
      */
     public static void main(final String[] args) {
+    
+        work("http://www.fatwire.com/cs/","/cs/ContentServer?c=Page&cid=1141059098394&p=1141059098394&pagename=FW%2FRenderTheHomePage_US");
+            
+//            .create("http://radium.nl.fatwire.com:8080/cs/"));
+//
+//           .addStartUri("/cs/ContentServer?pagename=FSIIWrapper&cid=1118867611403&c=Page&p=1118867611403&childpagename=FirstSiteII/FSIILayout&"
+//                            + HelperStrings.SS_PAGEDATA_REQUEST + "=true");
+            
+    }
+    
+    private static void work(String host, String start){
         //";
         final HostConfig hc = App.createHostConfig(URI
-                .create("http://radium.nl.fatwire.com:8080/cs/"));
+                .create(host));
 
-        final RenderCommand command = new RenderCommand(hc, 500);
+        final RenderCommand command = new RenderCommand(hc, 75);
         command
-                .addStartUri("/cs/ContentServer?pagename=FSIIWrapper&cid=1118867611403&c=Page&p=1118867611403&childpagename=FirstSiteII/FSIILayout&"
+                .addStartUri(start +"&"
                         + HelperStrings.SS_PAGEDATA_REQUEST + "=true");
         final File outputDir = App.getOutputDir();
         final PageletTimingsCollector timingsCollector = new PageletTimingsCollector(
