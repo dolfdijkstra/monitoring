@@ -1,16 +1,16 @@
 package com.fatwire.cs.profiling.ss;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -18,33 +18,41 @@ import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.fatwire.cs.profiling.ss.domain.HostConfig;
+import com.fatwire.cs.profiling.ss.events.PageletRenderedEvent;
+import com.fatwire.cs.profiling.ss.events.PageletRenderingListener;
+import com.fatwire.cs.profiling.ss.util.HelperStrings;
+import com.fatwire.cs.profiling.ss.util.SSUriHelper;
+
 public class URLReaderService {
     private final Log log = LogFactory.getLog(getClass());
 
-    private final List<String> urlsToDo;
-
-    private Set<String> urlsDone;
-
-    private String hostname;
-
-    private int port;
-
-    private String path;
-
     private volatile boolean stopped = false;
+
+    private HostConfig hostConfig;
+
+    private SSUriHelper uriHelper;
 
     private HttpClient client;
 
-    private ThreadPoolExecutor readerPool;
+    private volatile int count = 0;
 
-    BlockingQueue<Runnable> workQueue;
+    private int maxPages = Integer.MAX_VALUE;
+
+    private final Set<PageletRenderingListener> listeners = new CopyOnWriteArraySet<PageletRenderingListener>();
+
+    private final List<String> startUrls;
+
+    private final Scheduler scheduler;
 
     /**
      * @param urlsToDo
      */
-    public URLReaderService(final List<String> urlsToDo) {
+    public URLReaderService(final List<String> urlsToDo,
+            final ThreadPoolExecutor readerPool) {
         super();
-        this.urlsToDo = urlsToDo;
+        this.startUrls = urlsToDo;
+        scheduler = new Scheduler(readerPool);
 
     }
 
@@ -54,66 +62,152 @@ public class URLReaderService {
                 30000);
         client.getHttpConnectionManager().getParams()
                 .setDefaultMaxConnectionsPerHost(15);
-        client.getHostConfiguration().setHost(hostname, port);
-        HttpState initialState = new HttpState();
+        client.getHostConfiguration().setHost(hostConfig.getHostname(),
+                hostConfig.getPort());
+        final HttpState initialState = new HttpState();
+        initialState.addCookie(new Cookie(hostConfig.getHostname(),
+                HelperStrings.SS_CLIENT_INDICATOR, Boolean.TRUE.toString(),
+                hostConfig.getDomain(), -1, false));
 
-        // Get HTTP client instance
+        // set state
         client.setState(initialState);
 
         // RFC 2101 cookie management spec is used per default
         // to parse, validate, format & match cookies
         client.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
-
-    }
-
-    void initPools() {
-        workQueue = new LinkedBlockingQueue<Runnable>();
-        readerPool = new ThreadPoolExecutor(3, 20, 60, TimeUnit.SECONDS,
-                workQueue);
-
     }
 
     public void start() {
-        initPools();
         initClient();
-        List<String> initialToDo = new ArrayList<String>(urlsToDo);
+        final List<String> initialToDo = new ArrayList<String>(startUrls);
 
-        for (String thingToDo : initialToDo) {
-            read(thingToDo);
+        for (final String thingToDo : initialToDo) {
+            scheduler.schedulePage(thingToDo);
+        }
+        scheduler.waitForlAllTasksToFinish();
+
+    }
+
+    class Scheduler {
+        private final List<String> urlsToDo = new ArrayList<String>();
+
+        private final Set<String> urlsDone = new HashSet<String>();
+
+        private final ThreadPoolExecutor readerPool;
+
+        private final AtomicBoolean complete = new AtomicBoolean(false);
+
+        private final Object lock = new Object();
+
+        /**
+         * @param readerPool
+         */
+        public Scheduler(final ThreadPoolExecutor readerPool) {
+            super();
+            this.readerPool = readerPool;
         }
 
-    }
+        void schedulePage(final String uriToDo) {
+            if (count++ > maxPages) {
+                return;
+            }
+            String uri = checkUri(uriToDo);
+            urlsDone.add(uri);
+            final UrlRenderingCallable downloader = new UrlRenderingCallable(
+                    client, uri, uriHelper);
 
-    public void waitForCompletion() throws InterruptedException {
-        Thread.sleep(1000L);
-        while (!isFinished()) {
-            Thread.sleep(1000L);
+            try {
+                //                final FutureTask<ResultPage> ft = new FutureTask<ResultPage>(
+                //                        downloader);
+                //                readerPool.submit(ft);
+                //readerPool.submit(new CollectorTask(ft));
+                readerPool.execute(new Harvester(downloader));
+
+            } catch (final Exception e) {
+                log.error(e.getMessage(), e);
+            }
+
         }
 
-    }
-
-    public boolean isFinished() {
-        return this.readerPool.getActiveCount() == 0;
-    }
-
-    void read(final String thingToDo) {
-
-        urlsDone.add(thingToDo);
-        UrlHandler handler = new UrlHandler(client, thingToDo, path);
-
-        try {
-            FutureTask<ResultPage> ft = new FutureTask<ResultPage>(handler);
-            readerPool.submit(ft);
-            readerPool.submit(new CollectorTask(ft));
-
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        String checkUri(String uri) {
+            if (uri.indexOf(HelperStrings.SS_PAGEDATA_REQUEST) == -1) {
+                return uri + HelperStrings.SS_PAGEDATA_REQUEST + "=true";
+            }
+            return uri;
         }
 
+        void pageComplete(final ResultPage page) {
+
+            for (final SSUri ssUri : page.getMarkers()) {
+                String url = uriHelper.toLink(ssUri);
+                if (!urlsDone.contains(url) && !urlsToDo.contains(url)) {
+                    log.debug("adding " + url);
+                    schedulePage(url);
+                }
+            }
+            for (final SSUri ssUri : page.getLinks()) {
+                String url = uriHelper.toLink(ssUri);
+                if (!urlsDone.contains(url) && !urlsToDo.contains(url)) {
+                    log.debug("adding " + url);
+                    schedulePage(url);
+                }
+            }
+            final PageletRenderedEvent event = new PageletRenderedEvent(this,
+                    page);
+            for (final PageletRenderingListener listener : listeners) {
+                listener.renderPerformed(event);
+            }
+        }
+
+        public void taskFinished() {
+            log.debug(readerPool.getActiveCount() + " "
+                    + readerPool.getQueue().size());
+            if (readerPool.getActiveCount() == 1
+                    && readerPool.getQueue().size() == 0) {
+                this.complete.set(true);
+                synchronized (lock) {
+                    lock.notifyAll();
+                }
+            }
+
+        }
+
+        void waitForlAllTasksToFinish() {
+            synchronized (lock) {
+                while (!complete.get()) {
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        log.warn(e, e);
+                    }
+                }
+            }
+        }
     }
 
-    void pageComplete(ResultPage page) {
-        log.info("page complete: " + page.getUri());
+    class Harvester implements Runnable {
+        final UrlRenderingCallable downloader;
+
+        /**
+         * @param downloader
+         */
+        public Harvester(final UrlRenderingCallable downloader) {
+            super();
+            this.downloader = downloader;
+        }
+
+        public void run() {
+            ResultPage page;
+            try {
+                page = downloader.call();
+                scheduler.pageComplete(page);
+            } catch (Exception e) {
+                log.error(e, e);
+            } finally {
+                scheduler.taskFinished();
+            }
+
+        }
 
     }
 
@@ -132,71 +226,17 @@ public class URLReaderService {
 
             try {
 
-                ResultPage page = future.get();
-                pageComplete(page);
-                for (String url : page.getMarkers()) {
-                    if (!urlsDone.contains(url) && !urlsToDo.contains(url)) {
-                        log.info("adding " + url);
-                        read(url);
-                    }
-                }
-                for (String url : page.getLinks()) {
-                    if (!urlsDone.contains(url) && !urlsToDo.contains(url)) {
-                        log.info("adding " + url);
-                        read(url);
-                    }
-                }
+                final ResultPage page = future.get();
+                scheduler.pageComplete(page);
 
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 log.error(e.getMessage(), e);
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 log.error(e.getMessage(), e);
             }
 
         }
 
-    }
-
-    /**
-     * @return the hostname
-     */
-    public String getHostname() {
-        return hostname;
-    }
-
-    /**
-     * @param hostname the hostname to set
-     */
-    public void setHostname(final String hostname) {
-        this.hostname = hostname;
-    }
-
-    /**
-     * @return the path
-     */
-    public String getPath() {
-        return path;
-    }
-
-    /**
-     * @param path the path to set
-     */
-    public void setPath(final String path) {
-        this.path = path;
-    }
-
-    /**
-     * @return the port
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * @param port the port to set
-     */
-    public void setPort(final int port) {
-        this.port = port;
     }
 
     /**
@@ -214,17 +254,31 @@ public class URLReaderService {
     }
 
     /**
-     * @return the urlsDone
+     * @return the maxPages
      */
-    public Set<String> getUrlsDone() {
-        return urlsDone;
+    public int getMaxPages() {
+        return maxPages;
     }
 
     /**
-     * @param urlsDone the urlsDone to set
+     * @param maxPages the maxPages to set
      */
-    public void setUrlsDone(final Set<String> urlsDone) {
-        this.urlsDone = urlsDone;
+    public void setMaxPages(final int maxPages) {
+        this.maxPages = maxPages;
+    }
+
+    public void addListener(final PageletRenderingListener listener) {
+        this.listeners.add(listener);
+    }
+
+    public void removeListener(final PageletRenderingListener listener) {
+        this.listeners.remove(listener);
+    }
+
+    public void setHostConfig(HostConfig hostConfig) {
+        this.hostConfig = hostConfig;
+        this.uriHelper = new SSUriHelper(hostConfig.getDomain());
+
     }
 
 }

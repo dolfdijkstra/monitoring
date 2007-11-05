@@ -4,15 +4,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.httpclient.Header;
+
+import com.fatwire.cs.profiling.ss.util.UriUtil;
+
 public class ResultPage {
 
     private final String uri;
 
     private String body;
 
-    private final List<String> links;
+    private Header[] responseHeaders;
 
-    private final List<String> markers;
+    private final List<SSUri> links;
+
+    private final List<SSUri> markers;
+
+    private long readTime = -1;
+
+    private String pageName;
 
     /**
      * @param uri
@@ -20,8 +30,9 @@ public class ResultPage {
     public ResultPage(final String uri) {
         super();
         this.uri = uri;
-        links = new ArrayList<String>();
-        markers = new ArrayList<String>();
+        pageName = UriUtil.extractPageName(uri);
+        links = new ArrayList<SSUri>();
+        markers = new ArrayList<SSUri>();
     }
 
     /**
@@ -41,7 +52,7 @@ public class ResultPage {
     /**
      * @return the links
      */
-    public List<String> getLinks() {
+    public List<SSUri> getLinks() {
         return links;
     }
 
@@ -52,21 +63,22 @@ public class ResultPage {
         return uri;
     }
 
-    public void addLink(String uri) {
+    public void addLink(SSUri uri) {
         this.links.add(uri);
 
     }
 
-    public void addLinks(Collection<String> uris) {
+    public void addLinks(Collection<SSUri> uris) {
         this.links.addAll(uris);
 
     }
-    public void addMarker(String uri) {
+
+    public void addMarker(SSUri uri) {
         this.markers.add(uri);
 
     }
 
-    public void addMarkers(Collection<String> uris) {
+    public void addMarkers(Collection<SSUri> uris) {
         this.markers.addAll(uris);
 
     }
@@ -105,8 +117,43 @@ public class ResultPage {
     /**
      * @return the markers
      */
-    public List<String> getMarkers() {
+    public List<SSUri> getMarkers() {
         return markers;
+    }
+
+    /**
+     * @return the readTime
+     */
+    public long getReadTime() {
+        return readTime;
+    }
+
+    /**
+     * @param readTime the readTime to set
+     */
+    public void setReadTime(long readTime) {
+        this.readTime = readTime;
+    }
+
+    /**
+     * @return the responseHeaders
+     */
+    public Header[] getResponseHeaders() {
+        return responseHeaders;
+    }
+
+    /**
+     * @param responseHeaders the responseHeaders to set
+     */
+    public void setResponseHeaders(Header[] responseHeaders) {
+        this.responseHeaders = responseHeaders;
+    }
+
+    /**
+     * @return the pageName
+     */
+    public String getPageName() {
+        return pageName;
     }
 
 }
