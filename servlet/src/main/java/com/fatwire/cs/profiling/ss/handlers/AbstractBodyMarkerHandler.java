@@ -3,16 +3,11 @@ package com.fatwire.cs.profiling.ss.handlers;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import com.fatwire.cs.profiling.ss.QueryString;
 import com.fatwire.cs.profiling.ss.ResultPage;
-import com.fatwire.cs.profiling.ss.SSUri;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 
 public abstract class AbstractBodyMarkerHandler extends AbstractBodyHandler {
-
-    private final Log log = LogFactory.getLog(getClass());
 
     private static final Pattern tagPattern = Pattern.compile(" .*?=\".*?\"");
 
@@ -31,14 +26,14 @@ public abstract class AbstractBodyMarkerHandler extends AbstractBodyHandler {
         //"<com.fatwire.satellite.page pagename="FirstSiteII/FSIILayout" cid="1118867611403" locale="1154551493541" rendermode="live" p="1118867611403" c="Page" /com.fatwire.satellite.page>
         while (m.find()) {
             log.debug(m.group());
-            doTag(m.group(),page);
+            doTag(m.group(), page);
         }
 
     }
 
-    private void doTag(final String tag,ResultPage page) {
+    private void doTag(final String tag, ResultPage page) {
         final Matcher m = getTagPattern().matcher(tag);
-        final SSUri map = new SSUri();
+        final QueryString map = new QueryString();
         while (m.find()) {
             log.trace(m.group());
             final String x = m.group();
