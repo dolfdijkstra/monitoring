@@ -12,8 +12,8 @@ public class BodyMarkerHandler extends AbstractBodyMarkerHandler {
 
     
 
-    public BodyMarkerHandler(final String body, final SSUriHelper uriHelper) {
-        super(body, uriHelper);
+    public BodyMarkerHandler(final SSUriHelper uriHelper) {
+        super(uriHelper);
     }
 
     

@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.SSUri;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 
@@ -23,26 +24,24 @@ public class SSUnqualifiedBodyLinkHandler extends AbstractBodyHandler {
      * @param body
      * @param uriHelper
      */
-    public SSUnqualifiedBodyLinkHandler(final String body, final SSUriHelper uriHelper) {
-        super(body, uriHelper);
+    public SSUnqualifiedBodyLinkHandler(final SSUriHelper uriHelper) {
+        super(uriHelper);
     }
 
-    @Override
-    protected void doWork() {
-        //System.out.println(body);
-        final Matcher m = linkPattern.matcher(body);
+    public void visit(ResultPage page) {
+        final Matcher m = linkPattern.matcher(page.getBody());
 
         while (m.find()) {
             log.debug(m.group());
             final String link = m.group();
             if (link.length() > 1) {
-                doLink(link.substring(0, link.length() - 1));
+                doLink(link.substring(0, link.length() - 1),page);
             }
         }
 
     }
 
-    void doLink(final String link) {
+    void doLink(final String link,ResultPage page) {
         log.trace(link);
         try {
             //<a href='ssUnqualifiedLink?op=CM_Actualidad_FA&c=Page&op2=1142352029508&paginaActual=0&pagename=ComunidadMadrid%2FEstructura&subMenuP=subMenuPresidenta&language=es&cid=1109266752498'
@@ -61,12 +60,13 @@ public class SSUnqualifiedBodyLinkHandler extends AbstractBodyHandler {
 
                 }
             }
-            if (!map.getParameters().isEmpty()) {
-                addLink(map);
+            if (!map.isOK()) {
+                page.addLink(map);
             }
         } catch (final URISyntaxException e) {
             log.error(e);
         }
     }
+
 
 }

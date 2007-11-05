@@ -55,9 +55,11 @@ public class PageletTimingsCollector {
         pagesDone.add(page.getUri());
         try {
             final StringBuilder msg = new StringBuilder();
-            msg.append(page.getUri());
+            msg.append(page.getPageName());
             msg.append("\t");
             msg.append(page.getReadTime());
+            msg.append("\t");
+            msg.append(page.getUri());
             msg.append("\r\n");
             writer.write(msg.toString());
         } catch (final IOException e) {

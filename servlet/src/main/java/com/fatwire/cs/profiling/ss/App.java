@@ -30,21 +30,15 @@ public class App {
         final HostConfig hc = App.createHostConfig(URI
                 .create("http://radium.nl.fatwire.com:8080/cs/"));
 
-        final RenderCommand command = new RenderCommand(hc, 5);
+        final RenderCommand command = new RenderCommand(hc, 500);
         command
                 .addStartUri("/cs/ContentServer?pagename=FSIIWrapper&cid=1118867611403&c=Page&p=1118867611403&childpagename=FirstSiteII/FSIILayout&"
                         + HelperStrings.SS_PAGEDATA_REQUEST + "=true");
         final File outputDir = App.getOutputDir();
         final PageletTimingsCollector timingsCollector = new PageletTimingsCollector(
                 new File(outputDir, "links.txt"));
-        try {
-            timingsCollector.open();
-            command.addListener(new LinkCollectingRenderListener(
-                    timingsCollector));
 
-        } catch (final IOException e) {
-            App.LOG.error(e, e);
-        }
+        command.addListener(new LinkCollectingRenderListener(timingsCollector));
 
         command.addListener(new PageCollectingRenderListener(outputDir));
         command.addListener(new PageCriteriaRenderListener());
@@ -54,6 +48,11 @@ public class App {
 
             public void jobFinished(final JobFinishedEvent event) {
                 timingsCollector.report();
+                try {
+                    timingsCollector.close();
+                } catch (IOException e) {
+                    LOG.error(e, e);
+                }
 
             }
 
@@ -63,7 +62,11 @@ public class App {
             }
 
             public void jobStarted(final JobStartedEvent event) {
-                // TODO Auto-generated method stub
+                try {
+                    timingsCollector.open();
+                } catch (IOException e) {
+                    LOG.error(e, e);
+                }
 
             }
 

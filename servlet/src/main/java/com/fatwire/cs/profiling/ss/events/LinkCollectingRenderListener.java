@@ -3,8 +3,6 @@
  */
 package com.fatwire.cs.profiling.ss.events;
 
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,17 +25,6 @@ public class LinkCollectingRenderListener implements PageletRenderingListener {
                 + page.getUri());
 
         linkCollector.add(page);
-
-    }
-
-    public void jobFinished() {
-        linkCollector.report();
-        try {
-            linkCollector.close();
-        } catch (IOException e) {
-            LOG.error(e, e);
-
-        }
 
     }
 }

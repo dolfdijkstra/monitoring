@@ -13,27 +13,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.fatwire.cs.profiling.ss.handlers.BodyHandler;
-import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 
 public class UrlRenderingCallable implements Callable<ResultPage> {
     private final Log log = LogFactory.getLog(getClass());
 
-    final HttpClient client;
+    private final HttpClient client;
 
-    final String uri;
+    private final String uri;
 
-    final SSUriHelper uriHelper;
+    private final BodyHandler handler;
 
     /**
      * @param client
      * @param uri
      */
     public UrlRenderingCallable(final HttpClient client, final String uri,
-            final SSUriHelper uriHelper) {
+            final BodyHandler handler) {
         super();
         this.client = client;
         this.uri = uri;
-        this.uriHelper = uriHelper;
+        this.handler = handler;
     }
 
     public ResultPage call() throws Exception {
@@ -66,10 +65,7 @@ public class UrlRenderingCallable implements Callable<ResultPage> {
                             log.trace(responseBody);
                         }
                         page.setBody(responseBody);
-                        final BodyHandler handler = new BodyHandler(page, uriHelper);
-
-                        handler.call();
-
+                        handler.visit(page);
                     }
                 }
             } else {

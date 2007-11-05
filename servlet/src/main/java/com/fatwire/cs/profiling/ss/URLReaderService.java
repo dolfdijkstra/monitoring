@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import com.fatwire.cs.profiling.ss.domain.HostConfig;
 import com.fatwire.cs.profiling.ss.events.PageletRenderedEvent;
 import com.fatwire.cs.profiling.ss.events.PageletRenderingListener;
+import com.fatwire.cs.profiling.ss.handlers.BodyHandler;
 import com.fatwire.cs.profiling.ss.util.HelperStrings;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 
@@ -32,6 +33,8 @@ public class URLReaderService {
     private HostConfig hostConfig;
 
     private SSUriHelper uriHelper;
+
+    private BodyHandler handler;
 
     private HttpClient client;
 
@@ -113,7 +116,7 @@ public class URLReaderService {
             String uri = checkUri(uriToDo);
 
             final UrlRenderingCallable downloader = new UrlRenderingCallable(
-                    client, uri, uriHelper);
+                    client, uri, handler);
 
             try {
                 readerPool.execute(new Harvester(downloader));
@@ -278,6 +281,7 @@ public class URLReaderService {
     public void setHostConfig(HostConfig hostConfig) {
         this.hostConfig = hostConfig;
         this.uriHelper = new SSUriHelper(hostConfig.getDomain());
+        handler = new BodyHandler(uriHelper);
 
     }
 
