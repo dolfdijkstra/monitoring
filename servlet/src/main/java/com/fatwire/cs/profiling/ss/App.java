@@ -30,7 +30,7 @@ public class App {
         final HostConfig hc = App.createHostConfig(URI
                 .create("http://radium.nl.fatwire.com:8080/cs/"));
 
-        final RenderCommand command = new RenderCommand(hc, 500);
+        final RenderCommand command = new RenderCommand(hc, 5);
         command
                 .addStartUri("/cs/ContentServer?pagename=FSIIWrapper&cid=1118867611403&c=Page&p=1118867611403&childpagename=FirstSiteII/FSIILayout&"
                         + HelperStrings.SS_PAGEDATA_REQUEST + "=true");

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,7 +13,7 @@ import com.fatwire.cs.profiling.ss.events.PageletRenderedEvent;
 import com.fatwire.cs.profiling.ss.events.PageletRenderingListener;
 import com.fatwire.cs.profiling.ss.jobs.Command;
 
-public class RenderCommand implements Command{
+public class RenderCommand implements Command {
     private static final Log LOG = LogFactory.getLog(RenderCommand.class);
 
     private final List<String> queue = new ArrayList<String>();
@@ -55,15 +54,18 @@ public class RenderCommand implements Command{
     }
 
     public void execute() {
-        final LinkedBlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
 
-        final RenderingThreadPool readerPool = new RenderingThreadPool(
-                workQueue);
+        final RenderingThreadPool readerPool = new RenderingThreadPool();
 
-        final URLReaderService reader = new URLReaderService(queue, readerPool);
+        final URLReaderService reader = new URLReaderService(readerPool);
 
         reader.setHostConfig(hostConfig);
         reader.setMaxPages(maxPages);
+
+        for (String uri : queue) {
+            reader.addStartUri(uri);
+        }
+
         reader.addListener(pageletRenderingListener);
 
         readerPool.addListener(new RenderingThreadPool.FinishedListener() {
@@ -79,7 +81,7 @@ public class RenderCommand implements Command{
 
                             while (readerPool.getActiveCount() > 0) {
                                 Thread.sleep(1000L);
-                                LOG.info(workQueue.size());
+                                LOG.info(readerPool.getQueue().size());
 
                             }
 
@@ -98,7 +100,6 @@ public class RenderCommand implements Command{
         });
 
         reader.start();
-
 
     }
 

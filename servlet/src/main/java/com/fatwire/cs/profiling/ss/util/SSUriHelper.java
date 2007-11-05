@@ -1,7 +1,6 @@
 package com.fatwire.cs.profiling.ss.util;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -60,23 +59,24 @@ public class SSUriHelper {
         } catch (EncoderException e) {
             log.warn(e);
             return null;
-        } catch (URISyntaxException e) {
+        } catch (RuntimeException e) {
             log.warn(e);
             return null;
         }
 
     }
 
-    public SSUri linkToMap(final String link)
-            throws URISyntaxException {
-        final URI uri = new URI(StringEscapeUtils.unescapeXml(link));
+    public SSUri linkToMap(final String link) {
+
+        final URI uri = URI.create(StringEscapeUtils.unescapeXml(link));
         log.debug(uri.getQuery());
         final String[] val = uri.getQuery().split("&");
         final SSUri map = new SSUri();
         for (final String v : val) {
             if (!v.startsWith("SSURI")) {
                 final int t = v.indexOf('=');
-                map.addParameter(v.substring(0, t), v.substring(t + 1, v.length()));
+                map.addParameter(v.substring(0, t), v.substring(t + 1, v
+                        .length()));
             } else {
                 if ("SSURIapptype=BlobServer".equals(v)) {
                     map.clear();

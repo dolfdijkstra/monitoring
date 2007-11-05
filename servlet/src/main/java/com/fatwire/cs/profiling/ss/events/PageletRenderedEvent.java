@@ -1,15 +1,11 @@
 package com.fatwire.cs.profiling.ss.events;
 
-
-
 import com.fatwire.cs.profiling.ss.ResultPage;
 
-public class PageletRenderedEvent extends EventObject {
-    private final ResultPage page;
+public class PageletRenderedEvent extends EventObject<ResultPage> {
 
-    public PageletRenderedEvent(Object source, ResultPage page) {
-        super(source);
-        this.page = page;
+    public PageletRenderedEvent(ResultPage page) {
+        super(page);
     }
 
     /**
@@ -21,7 +17,7 @@ public class PageletRenderedEvent extends EventObject {
      * @return the page
      */
     public ResultPage getPage() {
-        return page;
+        return getSource();
     }
 
 }
