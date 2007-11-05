@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.SSUri;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 
@@ -19,24 +20,19 @@ public class BodyLinkHandler extends AbstractBodyHandler {
      * @param body
      * @param uriHelper
      */
-    public BodyLinkHandler(String body, final SSUriHelper uriHelper) {
-        super(body, uriHelper);
+    public BodyLinkHandler(final SSUriHelper uriHelper) {
+        super(uriHelper);
     }
 
-    protected void doWork() {
-        final Matcher m = linkPattern.matcher(body);
+    public void visit(ResultPage page) {
+        final Matcher m = linkPattern.matcher(page.getBody());
         while (m.find()) {
             log.debug(m.group());
-            doLink(m.group());
-        }
-
-    }
-
-    void doLink(final String link) {
-        log.trace(link);
-        SSUri map = uriHelper.linkToMap(link);
-        if (map.isOK()) {
-            addLink(map);
+            SSUri map = uriHelper.linkToMap(m.group());
+            if (map.isOK()) {
+                page.addLink(map);
+            }
         }
     }
+
 }

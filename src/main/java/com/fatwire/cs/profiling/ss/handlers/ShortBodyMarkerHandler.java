@@ -13,8 +13,8 @@ public class ShortBodyMarkerHandler extends AbstractBodyMarkerHandler {
 
     private static final Pattern tagPattern = Pattern.compile(" .*?=\".*?\"");
 
-    public ShortBodyMarkerHandler(final String body, final SSUriHelper uriHelper) {
-        super(body, uriHelper);
+    public ShortBodyMarkerHandler(final SSUriHelper uriHelper) {
+        super(uriHelper);
     }
 
     @Override
