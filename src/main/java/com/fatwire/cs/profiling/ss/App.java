@@ -8,14 +8,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.fatwire.cs.profiling.ss.domain.HostConfig;
-import com.fatwire.cs.profiling.ss.events.JobFinishedEvent;
-import com.fatwire.cs.profiling.ss.events.JobListener;
-import com.fatwire.cs.profiling.ss.events.JobScheduledEvent;
-import com.fatwire.cs.profiling.ss.events.JobStartedEvent;
 import com.fatwire.cs.profiling.ss.events.LinkCollectingRenderListener;
 import com.fatwire.cs.profiling.ss.events.PageCollectingRenderListener;
 import com.fatwire.cs.profiling.ss.events.PageCriteriaRenderListener;
 import com.fatwire.cs.profiling.ss.jobs.CommandJob;
+import com.fatwire.cs.profiling.ss.jobs.JobFinishedEvent;
+import com.fatwire.cs.profiling.ss.jobs.JobListener;
+import com.fatwire.cs.profiling.ss.jobs.JobScheduledEvent;
+import com.fatwire.cs.profiling.ss.jobs.JobStartedEvent;
 import com.fatwire.cs.profiling.ss.util.HelperStrings;
 import com.fatwire.cs.profiling.ss.util.TempDir;
 

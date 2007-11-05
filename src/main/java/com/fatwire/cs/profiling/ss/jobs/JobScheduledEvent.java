@@ -1,6 +1,6 @@
-package com.fatwire.cs.profiling.ss.events;
+package com.fatwire.cs.profiling.ss.jobs;
 
-import com.fatwire.cs.profiling.ss.jobs.Job;
+import com.fatwire.cs.profiling.ss.events.EventObject;
 
 public class JobScheduledEvent extends EventObject<Job> {
 

@@ -3,9 +3,6 @@ package com.fatwire.cs.profiling.ss.jobs;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import com.fatwire.cs.profiling.ss.events.JobFinishedEvent;
-import com.fatwire.cs.profiling.ss.events.JobListener;
-import com.fatwire.cs.profiling.ss.events.JobStartedEvent;
 
 public class CommandJob implements Job {
 

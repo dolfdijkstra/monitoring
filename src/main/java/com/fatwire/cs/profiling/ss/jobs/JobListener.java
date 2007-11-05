@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.ss.events;
+package com.fatwire.cs.profiling.ss.jobs;
 
 public interface JobListener {
 
