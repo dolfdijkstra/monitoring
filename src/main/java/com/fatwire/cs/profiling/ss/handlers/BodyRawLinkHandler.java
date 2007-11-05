@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.ss;
+package com.fatwire.cs.profiling.ss.handlers;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,15 +6,17 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.fatwire.cs.profiling.ss.util.SSUriHelper;
+
 public class BodyRawLinkHandler extends AbstractBodyHandler {
 
     private final Log log = LogFactory.getLog(getClass());
 
     private final Pattern rawLinkPattern = Pattern
-            .compile("/cs/Satellite.*?[\"']");
+            .compile("Satellite\\?.*?[\"']");
 
-    public BodyRawLinkHandler(final String body, final String path) {
-        super(body, path);
+    public BodyRawLinkHandler(final String body, final SSUriHelper uriHelper) {
+        super(body, uriHelper);
 
     }
 
@@ -24,7 +26,7 @@ public class BodyRawLinkHandler extends AbstractBodyHandler {
         final Matcher m = rawLinkPattern.matcher(body);
 
         while (m.find()) {
-            log.info(m.group());
+            log.debug(m.group());
             //doTag(m.group());
         }
 

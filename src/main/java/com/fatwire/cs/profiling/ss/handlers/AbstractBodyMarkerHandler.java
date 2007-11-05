@@ -1,0 +1,54 @@
+package com.fatwire.cs.profiling.ss.handlers;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.fatwire.cs.profiling.ss.SSUri;
+import com.fatwire.cs.profiling.ss.util.SSUriHelper;
+
+public abstract class AbstractBodyMarkerHandler extends AbstractBodyHandler {
+
+    private final Log log = LogFactory.getLog(getClass());
+    
+    private static final Pattern tagPattern = Pattern.compile(" .*?=\".*?\"");
+
+    protected Pattern getTagPattern(){
+        return tagPattern;
+    }
+
+    protected abstract Pattern getPagePattern();
+
+    public AbstractBodyMarkerHandler(String body, final SSUriHelper uriHelper) {
+        super(body, uriHelper);
+    }
+
+    protected void doWork() {
+        final Matcher m = getPagePattern().matcher(body);
+        //"<com.fatwire.satellite.page pagename="FirstSiteII/FSIILayout" cid="1118867611403" locale="1154551493541" rendermode="live" p="1118867611403" c="Page" /com.fatwire.satellite.page>
+        while (m.find()) {
+            log.debug(m.group());
+            doTag(m.group());
+        }
+    
+    }
+
+    private void doTag(final String tag) {
+        final Matcher m = getTagPattern().matcher(tag);
+        final SSUri map = new SSUri();
+        while (m.find()) {
+            log.trace(m.group());
+            final String x = m.group();
+            final int t = x.indexOf('=');
+            final String key = x.substring(0, t).trim();
+            String value;
+            value = x.substring(t + 2, x.length() - 1);
+            map.addParameter(key, value);
+    
+        }
+        addLink(map);
+    }
+
+}
