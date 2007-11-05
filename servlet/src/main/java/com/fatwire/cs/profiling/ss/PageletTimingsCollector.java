@@ -45,6 +45,7 @@ public class PageletTimingsCollector {
     }
 
     public synchronized void report() {
+        LOG.info("reporing on "+pagesDone.size() +" pages");
         for (final Map.Entry<String, List<String>> s : new PageNameDecorator(
                 pagesDone).entrySet()) {
             LOG.info(s.getKey() + ":" + s.getValue().size());
