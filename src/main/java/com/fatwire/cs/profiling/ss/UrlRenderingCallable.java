@@ -12,34 +12,31 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.fatwire.cs.profiling.ss.handlers.BodyHandler;
-
 public class UrlRenderingCallable implements Callable<ResultPage> {
     private final Log log = LogFactory.getLog(getClass());
 
     private final HttpClient client;
 
     private final String uri;
-
-    private final BodyHandler handler;
+    
+    private final QueryString qs;
 
     /**
      * @param client
      * @param uri
      */
-    public UrlRenderingCallable(final HttpClient client, final String uri,
-            final BodyHandler handler) {
+    public UrlRenderingCallable(final HttpClient client, final String uri,final QueryString qs) {
         super();
         this.client = client;
         this.uri = uri;
-        this.handler = handler;
+        this.qs=qs;
     }
 
     public ResultPage call() throws Exception {
         if (log.isDebugEnabled())
             log.debug("downloading " + uri);
         final long startTime = System.currentTimeMillis();
-        final ResultPage page = new ResultPage(uri);
+        final ResultPage page = new ResultPage(qs);
         final GetMethod httpGet = new GetMethod(uri);
         httpGet.setFollowRedirects(true);
 
@@ -59,14 +56,13 @@ public class UrlRenderingCallable implements Callable<ResultPage> {
                     final String responseBody = copy(reader);
                     in.close();
                     page.setReadTime(System.currentTimeMillis() - startTime);
-
                     if (responseBody != null) {
                         if (log.isTraceEnabled()) {
                             log.trace(responseBody);
                         }
                         page.setBody(responseBody);
-                        handler.visit(page);
                     }
+
                 }
             } else {
                 log.error("reponse code is " + responseCode + " for "

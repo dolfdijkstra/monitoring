@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 
-public class PageNameDecorator extends TreeMap<String, List<String>> {
+import com.fatwire.cs.profiling.ss.QueryString;
+
+public class PageNameDecorator extends TreeMap<String, List<QueryString>> {
 
     /**
      * 
@@ -15,18 +17,18 @@ public class PageNameDecorator extends TreeMap<String, List<String>> {
     /**
      * @param c
      */
-    public PageNameDecorator(final Collection<? extends String> c) {
+    public PageNameDecorator(final Collection<? extends QueryString> c) {
         super();
-        for (final String s : c) {
-            String pageName = UriUtil.extractPageName(s);
+        for (final QueryString s : c) {
+            String pageName = s.getParameters().get(HelperStrings.PAGENAME);
             if (pageName != null) {
                 String p = "pagename=" + pageName;
-                List<String> l = null;
+                List<QueryString> l = null;
                 if (containsKey(p)) {
                     l = get(p);
 
                 } else {
-                    l = new ArrayList<String>();
+                    l = new ArrayList<QueryString>();
                     put(p, l);
                 }
                 l.add(s);

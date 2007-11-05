@@ -6,19 +6,19 @@ import java.util.List;
 
 import org.apache.commons.httpclient.Header;
 
-import com.fatwire.cs.profiling.ss.util.UriUtil;
+import com.fatwire.cs.profiling.ss.util.HelperStrings;
 
 public class ResultPage {
 
-    private final String uri;
+    private final QueryString uri;
 
     private String body;
 
     private Header[] responseHeaders;
 
-    private final List<SSUri> links;
+    private final List<QueryString> links;
 
-    private final List<SSUri> markers;
+    private final List<QueryString> markers;
 
     private long readTime = -1;
 
@@ -27,12 +27,12 @@ public class ResultPage {
     /**
      * @param uri
      */
-    public ResultPage(final String uri) {
+    public ResultPage(final QueryString uri) {
         super();
         this.uri = uri;
-        pageName = UriUtil.extractPageName(uri);
-        links = new ArrayList<SSUri>();
-        markers = new ArrayList<SSUri>();
+        pageName = uri.getParameters().get(HelperStrings.PAGENAME);
+        links = new ArrayList<QueryString>();
+        markers = new ArrayList<QueryString>();
     }
 
     /**
@@ -52,33 +52,33 @@ public class ResultPage {
     /**
      * @return the links
      */
-    public List<SSUri> getLinks() {
+    public List<QueryString> getLinks() {
         return links;
     }
 
     /**
      * @return the uri
      */
-    public String getUri() {
+    public QueryString getUri() {
         return uri;
     }
 
-    public void addLink(SSUri uri) {
+    public void addLink(QueryString uri) {
         this.links.add(uri);
 
     }
 
-    public void addLinks(Collection<SSUri> uris) {
+    public void addLinks(Collection<QueryString> uris) {
         this.links.addAll(uris);
 
     }
 
-    public void addMarker(SSUri uri) {
+    public void addMarker(QueryString uri) {
         this.markers.add(uri);
 
     }
 
-    public void addMarkers(Collection<SSUri> uris) {
+    public void addMarkers(Collection<QueryString> uris) {
         this.markers.addAll(uris);
 
     }
@@ -117,7 +117,7 @@ public class ResultPage {
     /**
      * @return the markers
      */
-    public List<SSUri> getMarkers() {
+    public List<QueryString> getMarkers() {
         return markers;
     }
 

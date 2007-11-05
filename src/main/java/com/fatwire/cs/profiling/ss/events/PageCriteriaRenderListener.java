@@ -6,6 +6,7 @@ package com.fatwire.cs.profiling.ss.events;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.logging.Log;
@@ -13,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.util.HelperStrings;
-import com.fatwire.cs.profiling.ss.util.UriUtil;
 
 public class PageCriteriaRenderListener implements PageletRenderingListener {
     private static final Log LOG = LogFactory
@@ -36,8 +36,9 @@ public class PageCriteriaRenderListener implements PageletRenderingListener {
                     final List<String> pageCriteria = Arrays.asList(header
                             .getValue() == null ? new String[0] : header
                             .getValue().split(","));
-                    final Map<String, String> params = UriUtil
-                            .extractParams(page.getUri());
+                    final Map<String, String> params = new TreeMap<String, String>(page
+                            .getUri().getParameters());
+                    //remove params that should not be part of PageCriteria
                     params.remove(HelperStrings.PAGENAME);
                     params.remove(HelperStrings.RENDERMODE);
                     params.remove(HelperStrings.SS_CLIENT_INDICATOR);

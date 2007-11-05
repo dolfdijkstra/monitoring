@@ -9,12 +9,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,9 +50,6 @@ public class URLReaderService {
 
     private final Scheduler scheduler;
 
-    /**
-     * @param urlsToDo
-     */
     public URLReaderService(final ThreadPoolExecutor readerPool) {
         super();
         scheduler = new Scheduler(readerPool);
@@ -65,6 +64,8 @@ public class URLReaderService {
                 .setDefaultMaxConnectionsPerHost(15);
         client.getHostConfiguration().setHost(hostConfig.getHostname(),
                 hostConfig.getPort());
+        client.getParams().setParameter(HttpMethodParams.USER_AGENT,
+                "SS-UserAgent-0.9");
         final HttpState initialState = new HttpState();
         initialState.addCookie(new Cookie(hostConfig.getHostname(),
                 HelperStrings.SS_CLIENT_INDICATOR, Boolean.TRUE.toString(),
@@ -90,15 +91,17 @@ public class URLReaderService {
     }
 
     class Scheduler {
-        private final List<SSUri> urlsToDo = new ArrayList<SSUri>();
+        //        private final List<QueryString> urlsToDo = new ArrayList<QueryString>();
 
-        private final Set<SSUri> urlsDone = new HashSet<SSUri>();
+        private final Set<QueryString> urlsDone = new HashSet<QueryString>();
 
         private final ThreadPoolExecutor readerPool;
 
         private final AtomicBoolean complete = new AtomicBoolean(false);
 
         private final Object lock = new Object();
+
+        private final AtomicInteger scheduledCounter = new AtomicInteger();
 
         /**
          * @param readerPool
@@ -108,15 +111,15 @@ public class URLReaderService {
             this.readerPool = readerPool;
         }
 
-        void schedulePage(final SSUri uriToDo) {
+        void schedulePage(final QueryString qs) {
             if (count++ > maxPages) {
                 return;
             }
-            urlsDone.add(uriToDo);
-            String uri = checkUri(uriToDo);
-
+            urlsDone.add(qs);
+            String uri = checkUri(qs);
+            this.scheduledCounter.incrementAndGet();
             final UrlRenderingCallable downloader = new UrlRenderingCallable(
-                    client, uri, handler);
+                    client, uri,qs);
 
             try {
                 readerPool.execute(new Harvester(downloader));
@@ -127,31 +130,31 @@ public class URLReaderService {
 
         }
 
-        String checkUri(SSUri ssuri) {
+        private String checkUri(QueryString ssuri) {
             String uri = uriHelper.toLink(ssuri);
-            if (uri.indexOf(HelperStrings.SS_PAGEDATA_REQUEST) == -1) {
-                return uri + HelperStrings.SS_PAGEDATA_REQUEST + "=true";
+            if (ssuri.getParameters().containsKey(
+                    HelperStrings.SS_PAGEDATA_REQUEST) == false) {
+                return uri + "&" + HelperStrings.SS_PAGEDATA_REQUEST + "=true";
             }
             return uri;
         }
 
         void pageComplete(final ResultPage page) {
 
-            for (final SSUri ssUri : page.getMarkers()) {
+            for (final QueryString ssUri : page.getMarkers()) {
 
-                if (!urlsDone.contains(ssUri) && !urlsToDo.contains(ssUri)) {
+                if (!urlsDone.contains(ssUri)) {
                     if (log.isDebugEnabled()) {
-                        String url = uriHelper.toLink(ssUri);
-                        log.debug("adding " + url);
+                        log.debug("adding " + ssUri);
                     }
                     schedulePage(ssUri);
                 }
             }
-            for (final SSUri ssUri : page.getLinks()) {
-                if (!urlsDone.contains(ssUri) && !urlsToDo.contains(ssUri)) {
+            for (final QueryString ssUri : page.getLinks()) {
+                if (!urlsDone.contains(ssUri)) {
                     if (log.isDebugEnabled()) {
-                        String url = uriHelper.toLink(ssUri);
-                        log.debug("adding " + url);
+                        //String url = uriHelper.toLink(ssUri);
+                        log.debug("adding " + ssUri);
                     }
                     schedulePage(ssUri);
                 }
@@ -165,8 +168,9 @@ public class URLReaderService {
         public void taskFinished() {
             log.debug(readerPool.getActiveCount() + " "
                     + readerPool.getQueue().size());
-            if (readerPool.getActiveCount() == 1
-                    && readerPool.getQueue().size() == 0) {
+            //            if (readerPool.getActiveCount() == 1
+            //                    && readerPool.getQueue().size() == 0) {
+            if (this.scheduledCounter.decrementAndGet() == 0) {
                 this.complete.set(true);
                 synchronized (lock) {
                     lock.notifyAll();
@@ -200,9 +204,13 @@ public class URLReaderService {
         }
 
         public void run() {
-            ResultPage page;
+            
             try {
+                final ResultPage page;
                 page = downloader.call();
+                if (page.getBody() != null) {
+                    handler.visit(page);
+                }
                 scheduler.pageComplete(page);
             } catch (Exception e) {
                 log.error(e, e);
