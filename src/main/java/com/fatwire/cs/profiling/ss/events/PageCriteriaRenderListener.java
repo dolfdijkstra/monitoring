@@ -25,6 +25,9 @@ public class PageCriteriaRenderListener implements PageletRenderingListener {
 
     public void renderPerformed(final PageletRenderedEvent event) {
         final ResultPage page = event.getPage();
+        if (page.getResponseCode() != 200)
+            return; //bail out
+
         //check if this pagelet should be cached (is cacheable)
         if (page.getBody().endsWith(HelperStrings.STATUS_NOTCACHED)) {
             return;

@@ -16,7 +16,6 @@ import com.fatwire.cs.profiling.ss.jobs.JobFinishedEvent;
 import com.fatwire.cs.profiling.ss.jobs.JobListener;
 import com.fatwire.cs.profiling.ss.jobs.JobScheduledEvent;
 import com.fatwire.cs.profiling.ss.jobs.JobStartedEvent;
-import com.fatwire.cs.profiling.ss.util.HelperStrings;
 import com.fatwire.cs.profiling.ss.util.TempDir;
 
 public class App {
@@ -26,32 +25,35 @@ public class App {
      * @param args
      */
     public static void main(final String[] args) {
-    
-        work("http://www.fatwire.com/cs/","/cs/ContentServer?c=Page&cid=1141059098394&p=1141059098394&pagename=FW%2FRenderTheHomePage_US");
-            
-//            .create("http://radium.nl.fatwire.com:8080/cs/"));
-//
-//           .addStartUri("/cs/ContentServer?pagename=FSIIWrapper&cid=1118867611403&c=Page&p=1118867611403&childpagename=FirstSiteII/FSIILayout&"
-//                            + HelperStrings.SS_PAGEDATA_REQUEST + "=true");
-            
-    }
-    
-    private static void work(String host, String start){
-        //";
-        final HostConfig hc = App.createHostConfig(URI
-                .create(host));
 
-        final RenderCommand command = new RenderCommand(hc, 75);
-        command
-                .addStartUri(start +"&"
-                        + HelperStrings.SS_PAGEDATA_REQUEST + "=true");
+        work(
+                "http://www.fatwire.com/cs/",
+                "/cs/ContentServer?c=Page&cid=1141059098394&p=1141059098394&pagename=FW%2FRenderTheHomePage_US",
+                500);
+
+        //            .create("http://radium.nl.fatwire.com:8080/cs/"));
+        //
+        //           .addStartUri("/cs/ContentServer?pagename=FSIIWrapper&cid=1118867611403&c=Page&p=1118867611403&childpagename=FirstSiteII/FSIILayout&"
+        //                            + HelperStrings.SS_PAGEDATA_REQUEST + "=true");
+
+    }
+
+    private static void work(String host, String start, int maxPages) {
+        //";
+        final HostConfig hc = App.createHostConfig(URI.create(host));
+
+        final RenderCommand command = new RenderCommand(hc, maxPages);
+        command.addStartUri(start);
+        //+"&"  + HelperStrings.SS_PAGEDATA_REQUEST + "=true");
         final File outputDir = App.getOutputDir();
         final PageletTimingsCollector timingsCollector = new PageletTimingsCollector(
                 new File(outputDir, "links.txt"));
+        File pageDir = new File(outputDir, "pages");
+        pageDir.mkdirs();
 
         command.addListener(new LinkCollectingRenderListener(timingsCollector));
 
-        command.addListener(new PageCollectingRenderListener(outputDir));
+        command.addListener(new PageCollectingRenderListener(pageDir));
         command.addListener(new PageCriteriaRenderListener());
 
         final CommandJob job = new CommandJob(command);

@@ -23,6 +23,8 @@ public class ResultPage {
     private long readTime = -1;
 
     private String pageName;
+    
+    private int responseCode=-1;
 
     /**
      * @param uri
@@ -139,7 +141,7 @@ public class ResultPage {
      * @return the responseHeaders
      */
     public Header[] getResponseHeaders() {
-        return responseHeaders;
+        return responseHeaders !=null ? responseHeaders: new Header[0];
     }
 
     /**
@@ -154,6 +156,20 @@ public class ResultPage {
      */
     public String getPageName() {
         return pageName;
+    }
+
+    /**
+     * @return the responseCode
+     */
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    /**
+     * @param responseCode the responseCode to set
+     */
+    public void setResponseCode(int responseCode) {
+        this.responseCode = responseCode;
     }
 
 }

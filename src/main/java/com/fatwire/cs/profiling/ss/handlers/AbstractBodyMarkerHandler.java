@@ -39,13 +39,19 @@ public abstract class AbstractBodyMarkerHandler extends AbstractBodyHandler {
             final String x = m.group();
             final int t = x.indexOf('=');
             final String key = x.substring(0, t).trim();
-            String value;
-            value = x.substring(t + 2, x.length() - 1);
-            map.addParameter(key, value);
+            if (filter(key)) {
+                String value;
+                value = x.substring(t + 2, x.length() - 1);
+                map.addParameter(key, value);
+            }
 
         }
         page.addMarker(map);
 
+    }
+
+    protected boolean filter(String key) {
+        return !"cachecontrol".equalsIgnoreCase(key);
     }
 
 }
