@@ -7,7 +7,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,10 +57,21 @@ public class PageletTimingsCollector {
         //        }
         DecimalFormat df = new DecimalFormat("#,##0.00");
         DecimalFormat lf = new DecimalFormat("#,##0");
+        DateFormat dateFormat = new SimpleDateFormat("hh:mm:ss");
+        int l = 0;
+        for (final String s : stats.keySet()) {
+            l = Math.max(s.length(), l);
+        }
+        char[] blank = new char[l];
+        Arrays.fill(blank, ' ');
+        String header = "pagename"+ new String(blank,0,l-8)+"\tinvocations\taverage\tfirst\tmax\tstandard-deviation";
+        System.out.println(header);
+
         for (final SimpleStatistics s : stats.values()) {
-            String line = s.getName() + "\t" + s.getInvocations() + "\t"
+            String n = s.getName() + new String(blank,0,l-s.getName().length());
+            String line = n + "\t" + s.getInvocations() + "\t"
                     + df.format(s.getAverage()) + "\t"
-                    + new Date(s.getFirstDate()) + "\t"
+                    + dateFormat.format(new Date(s.getFirstDate())) + "\t"
                     + lf.format(s.getMaxvalue()) + "\t"
                     + df.format(s.getStandardDeviation());
             System.out.println(line);

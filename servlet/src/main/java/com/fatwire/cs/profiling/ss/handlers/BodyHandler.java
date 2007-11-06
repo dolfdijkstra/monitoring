@@ -24,6 +24,8 @@ public class BodyHandler implements Visitor<ResultPage> {
     }
 
     public void visit(ResultPage page) {
+        if (page.getResponseCode() != 200)
+            return; //bail out
         for (Visitor<ResultPage> visitor : visitors) {
             visitor.visit(page);
         }

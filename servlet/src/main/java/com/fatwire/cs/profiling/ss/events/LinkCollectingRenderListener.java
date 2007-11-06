@@ -10,7 +10,7 @@ import com.fatwire.cs.profiling.ss.PageletTimingsCollector;
 import com.fatwire.cs.profiling.ss.ResultPage;
 
 public class LinkCollectingRenderListener implements PageletRenderingListener {
-    private static final Log LOG = LogFactory
+    private final Log LOG = LogFactory
             .getLog(LinkCollectingRenderListener.class);
 
     private final PageletTimingsCollector linkCollector;
@@ -21,9 +21,11 @@ public class LinkCollectingRenderListener implements PageletRenderingListener {
 
     public void renderPerformed(final PageletRenderedEvent event) {
         final ResultPage page = event.getPage();
-        LOG.info("page complete: in " + page.getReadTime() + " "
-                + page.getUri());
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("page complete: in " + page.getReadTime() + " "
+                    + page.getUri() + " with statuscode: "
+                    + page.getResponseCode());
+        }
         linkCollector.add(page);
 
     }

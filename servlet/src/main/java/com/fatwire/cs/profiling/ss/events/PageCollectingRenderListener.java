@@ -30,12 +30,14 @@ public class PageCollectingRenderListener implements PageletRenderingListener {
 
     public void renderPerformed(final PageletRenderedEvent event) {
         final ResultPage page = event.getPage();
+        if (page.getResponseCode() != 200)
+            return; //bail out
         final long id = idGen.incrementAndGet();
         FileWriter writer = null;
 
         try {
-            final String p = page.getPageName() != null ? page.getPageName().replace(
-                    '/', '_') : "";
+            final String p = page.getPageName() != null ? page.getPageName()
+                    .replace('/', '_') : "";
             writer = new FileWriter(new File(dir, p + "-" + id + ".txt"));
             final Header[] headers = page.getResponseHeaders();
             for (final Header header : headers) {
@@ -60,6 +62,6 @@ public class PageCollectingRenderListener implements PageletRenderingListener {
 
     public void jobFinished() {
         // TODO Auto-generated method stub
-        
+
     }
 }

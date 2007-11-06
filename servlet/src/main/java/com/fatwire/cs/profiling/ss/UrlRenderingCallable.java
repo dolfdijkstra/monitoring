@@ -42,10 +42,10 @@ public class UrlRenderingCallable implements Callable<ResultPage> {
 
         try {
             final int responseCode = client.executeMethod(httpGet);
+            page.setResponseCode(responseCode);
             //log.info(iGetResultCode);
+            page.setResponseHeaders(httpGet.getResponseHeaders());
             if (responseCode == 200) {
-
-                page.setResponseHeaders(httpGet.getResponseHeaders());
                 final String charSet = httpGet.getResponseCharSet();
                 //log.info(charSet);
 
@@ -65,6 +65,8 @@ public class UrlRenderingCallable implements Callable<ResultPage> {
 
                 }
             } else {
+                
+                page.setReadTime(System.currentTimeMillis() - startTime);
                 log.error("reponse code is " + responseCode + " for "
                         + httpGet.getURI().toString());
             }
