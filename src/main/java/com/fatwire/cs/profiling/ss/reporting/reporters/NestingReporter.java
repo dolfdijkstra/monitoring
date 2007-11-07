@@ -5,8 +5,12 @@ import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.reporting.Report;
 
 public class NestingReporter extends ReportDelegatingReporter {
-    public NestingReporter(Report report) {
+
+    private final int threshold;
+
+    public NestingReporter(Report report, final int threshold) {
         super(report);
+        this.threshold = threshold;
 
     }
 
@@ -26,8 +30,11 @@ public class NestingReporter extends ReportDelegatingReporter {
         super.startCollecting();
 
         for (QueryString qs : tracker.getKeys()) {
-            report.addRow(qs.toString() + " has a nesting level of "
-                    + tracker.getNestingLevel(qs));
+            int level = tracker.getNestingLevel(qs);
+            if (level >= threshold) {
+                report.addRow(qs.toString() + " has a nesting level of "
+                        + level);
+            }
         }
 
         super.endCollecting();
