@@ -28,6 +28,7 @@ public class NestingTracker {
             return 0;
         if (pages.containsKey(qs)) {
             for (QueryString inner : pages.get(qs)) {
+                level++;
                 level = level + getNestingLevel(inner);
             }
         }
