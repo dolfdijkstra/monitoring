@@ -1,6 +1,7 @@
 package com.fatwire.cs.profiling.ss;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class URLReaderService {
 
     private HttpClient client;
 
-    private volatile int count = 0;
+    
 
     private int maxPages = Integer.MAX_VALUE;
 
@@ -65,7 +66,7 @@ public class URLReaderService {
         client.getHostConfiguration().setHost(hostConfig.getHostname(),
                 hostConfig.getPort());
         client.getParams().setParameter(HttpMethodParams.USER_AGENT,
-                "SS-UserAgent-0.9");
+                "SS-Crawler-0.9");
         final HttpState initialState = new HttpState();
         initialState.addCookie(new Cookie(hostConfig.getHostname(),
                 HelperStrings.SS_CLIENT_INDICATOR, Boolean.TRUE.toString(),
@@ -102,9 +103,9 @@ public class URLReaderService {
         private final Object lock = new Object();
 
         private final AtomicInteger scheduledCounter = new AtomicInteger();
-
+        private volatile int count = 0;
         /**
-         * @param readerPool
+         * @param executor
          */
         public Scheduler(final ThreadPoolExecutor readerPool) {
             super();
@@ -168,8 +169,8 @@ public class URLReaderService {
         public void taskFinished() {
             log.debug(readerPool.getActiveCount() + " "
                     + readerPool.getQueue().size());
-            //            if (readerPool.getActiveCount() == 1
-            //                    && readerPool.getQueue().size() == 0) {
+            //            if (executor.getActiveCount() == 1
+            //                    && executor.getQueue().size() == 0) {
             if (this.scheduledCounter.decrementAndGet() == 0) {
                 this.complete.set(true);
                 synchronized (lock) {
@@ -293,8 +294,8 @@ public class URLReaderService {
 
     }
 
-    public void addStartUri(String uri) {
-        this.startUrls.add(uri);
+    public void addStartUris(Collection<String> uri) {
+        this.startUrls.addAll(uri);
     }
 
 }

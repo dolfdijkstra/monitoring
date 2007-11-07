@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,31 +23,25 @@ public class RenderCommand implements Command {
 
     private int maxPages = 500;
 
+    final ThreadPoolExecutor executor;
+
     private final Set<PageletRenderingListener> listeners = new CopyOnWriteArraySet<PageletRenderingListener>();
-
-    private final PageletRenderingListener pageletRenderingListener = new PageletRenderingListener() {
-
-        public void renderPerformed(final PageletRenderedEvent event) {
-            for (final PageletRenderingListener listener : listeners) {
-                listener.renderPerformed(event);
-            }
-
-        }
-
-    };
 
     /**
      * @param hostConfig
      * @param maxPages
      */
-    public RenderCommand(final HostConfig hostConfig, int maxPages) {
+    public RenderCommand(final HostConfig hostConfig, int maxPages,
+            final ThreadPoolExecutor executor) {
         super();
         this.hostConfig = hostConfig;
         this.maxPages = maxPages;
+        this.executor = executor;
     }
 
-    public RenderCommand(final HostConfig hostConfig) {
-        this(hostConfig, Integer.MAX_VALUE);
+    public RenderCommand(final HostConfig hostConfig,
+            final ThreadPoolExecutor readerPool) {
+        this(hostConfig, Integer.MAX_VALUE, readerPool);
     }
 
     public void addStartUri(String uri) {
@@ -55,51 +50,28 @@ public class RenderCommand implements Command {
 
     public void execute() {
 
-        final RenderingThreadPool readerPool = new RenderingThreadPool();
-
-        final URLReaderService reader = new URLReaderService(readerPool);
+        final URLReaderService reader = new URLReaderService(executor);
 
         reader.setHostConfig(hostConfig);
         reader.setMaxPages(maxPages);
 
-        for (String uri : queue) {
-            reader.addStartUri(uri);
-        }
+        reader.addStartUris(queue);
 
-        reader.addListener(pageletRenderingListener);
+        final PageletRenderingListener readerListener = new PageletRenderingListener() {
 
-        readerPool.addListener(new RenderingThreadPool.FinishedListener() {
-
-            public void finished() {
-                LOG.info("finished");
-                Thread t = new Thread(new Runnable() {
-                    public void run() {
-
-                        try {
-
-                            //Thread.sleep(1000L);
-
-                            while (readerPool.getActiveCount() > 0) {
-                                Thread.sleep(1000L);
-                                LOG.info(readerPool.getQueue().size());
-
-                            }
-
-                        } catch (final InterruptedException e) {
-                            LOG.warn(e, e);
-                        }
-                        if (readerPool.getActiveCount() == 0) {
-                            readerPool.shutdown();
-                        }
-                    }
-                }, "JobTimeout-Thread-" + RenderCommand.this.hashCode());
-                t.start();
+            public void renderPerformed(final PageletRenderedEvent event) {
+                for (final PageletRenderingListener listener : listeners) {
+                    listener.renderPerformed(event);
+                }
 
             }
 
-        });
+        };
+
+        reader.addListener(readerListener);
 
         reader.start();
+        reader.removeListener(readerListener);
 
     }
 
