@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.fatwire.cs.profiling.ss.events;
+package com.fatwire.cs.profiling.ss.reporting.reporters;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -13,10 +13,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.fatwire.cs.profiling.ss.ResultPage;
+import com.fatwire.cs.profiling.ss.reporting.Reporter;
 
-public class PageCollectingRenderListener implements PageletRenderingListener {
-    private static final Log LOG = LogFactory
-            .getLog(PageCollectingRenderListener.class);
+public class PageCollectingReporter implements Reporter {
+    private final Log log = LogFactory.getLog(getClass());
 
     private static final char[] CRLF = "\r\n".toCharArray();
 
@@ -24,30 +24,34 @@ public class PageCollectingRenderListener implements PageletRenderingListener {
 
     private final AtomicLong idGen = new AtomicLong(System.currentTimeMillis());
 
-    public PageCollectingRenderListener(final File dir) {
+    public PageCollectingReporter(final File dir) {
         this.dir = dir;
+        dir.getParentFile().mkdirs();
     }
 
-    public void renderPerformed(final PageletRenderedEvent event) {
-        final ResultPage page = event.getPage();
-        if (page.getResponseCode() != 200)
+    public void addToReport(final ResultPage page) {
+        if (page.getResponseCode() != 200) {
             return; //bail out
+        }
         final long id = idGen.incrementAndGet();
         FileWriter writer = null;
 
         try {
             final String p = page.getPageName() != null ? page.getPageName()
-                    .replace('/', '_') : "";
-            writer = new FileWriter(new File(dir, p + "-" + id + ".txt"));
+                    : "";
+            final File pFile = new File(dir, p + "-" + id + ".txt");
+            pFile.getParentFile().mkdirs();
+            writer = new FileWriter(pFile);
+            writer.write(page.getUri().toString());
+            writer.write(PageCollectingReporter.CRLF);
             final Header[] headers = page.getResponseHeaders();
             for (final Header header : headers) {
                 writer.write(header.toExternalForm());
-                //writer.write(CRLF);
             }
-            writer.write(PageCollectingRenderListener.CRLF);
+            writer.write(PageCollectingReporter.CRLF);
             writer.write(page.getBody());
         } catch (final IOException e) {
-            PageCollectingRenderListener.LOG.error(e, e);
+            log.error(e, e);
         } finally {
             if (writer != null) {
                 try {
@@ -60,7 +64,12 @@ public class PageCollectingRenderListener implements PageletRenderingListener {
 
     }
 
-    public void jobFinished() {
+    public void endCollecting() {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void startCollecting() {
         // TODO Auto-generated method stub
 
     }
