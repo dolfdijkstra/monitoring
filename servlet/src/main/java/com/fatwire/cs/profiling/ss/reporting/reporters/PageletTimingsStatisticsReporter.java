@@ -12,15 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.reporting.Report;
 import com.fatwire.cs.profiling.ss.statistics.SimpleStatistics;
 
 public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
-    private final Log log = LogFactory.getLog(getClass());
 
     private final Map<String, SimpleStatistics> stats = new HashMap<String, SimpleStatistics>();
 
@@ -50,6 +46,7 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
 
     @Override
     public void endCollecting() {
+        report.startReport();
         report.addRow("reporing on " + pagesDone.get() + " pages");
         final DecimalFormat df = new DecimalFormat("#,##0.00");
         final DecimalFormat lf = new DecimalFormat("#,##0");
@@ -74,6 +71,7 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
                     + df.format(s.getStandardDeviation());
             report.addRow(line);
         }
+        report.finishReport();
 
     }
 
