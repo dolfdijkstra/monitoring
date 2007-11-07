@@ -47,7 +47,7 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
     @Override
     public void endCollecting() {
         report.startReport();
-        report.addRow("reporing on " + pagesDone.get() + " pages");
+        report.addRow("reporting on " + pagesDone.get() + " pages");
         final DecimalFormat df = new DecimalFormat("#,##0.00");
         final DecimalFormat lf = new DecimalFormat("#,##0");
         final DateFormat dateFormat = new SimpleDateFormat("hh:mm:ss");
