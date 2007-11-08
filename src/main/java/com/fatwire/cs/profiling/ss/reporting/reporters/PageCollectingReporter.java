@@ -4,8 +4,10 @@
 package com.fatwire.cs.profiling.ss.reporting.reporters;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.httpclient.Header;
@@ -24,6 +26,8 @@ public class PageCollectingReporter implements Reporter {
 
     private final AtomicLong idGen = new AtomicLong(System.currentTimeMillis());
 
+    private PrintWriter pwriter;
+
     public PageCollectingReporter(final File dir) {
         this.dir = dir;
         dir.getParentFile().mkdirs();
@@ -40,9 +44,11 @@ public class PageCollectingReporter implements Reporter {
             final String p = page.getPageName() != null ? page.getPageName()
                     : "";
             final File pFile = new File(dir, p + "-" + id + ".txt");
+            pwriter.println(page.getUri() + "\t" + pFile.toString());
             pFile.getParentFile().mkdirs();
             writer = new FileWriter(pFile);
             writer.write(page.getUri().toString());
+            writer.write(PageCollectingReporter.CRLF);
             writer.write(PageCollectingReporter.CRLF);
             final Header[] headers = page.getResponseHeaders();
             for (final Header header : headers) {
@@ -65,12 +71,17 @@ public class PageCollectingReporter implements Reporter {
     }
 
     public void endCollecting() {
-        // TODO Auto-generated method stub
+        pwriter.close();
 
     }
 
     public void startCollecting() {
-        // TODO Auto-generated method stub
+        try {
+            pwriter = new PrintWriter(new File(this.dir.getParentFile(),
+                    "pages-list.txt"));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 }
