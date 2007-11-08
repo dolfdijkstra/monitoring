@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,9 +37,8 @@ public class URLReaderService {
 
     private BodyHandler handler;
 
-    private HttpClient client;
 
-    
+    private HttpClient client;
 
     private int maxPages = Integer.MAX_VALUE;
 
@@ -103,7 +100,9 @@ public class URLReaderService {
         private final Object lock = new Object();
 
         private final AtomicInteger scheduledCounter = new AtomicInteger();
+
         private volatile int count = 0;
+
         /**
          * @param executor
          */
@@ -112,15 +111,15 @@ public class URLReaderService {
             this.readerPool = readerPool;
         }
 
-        void schedulePage(final QueryString qs) {
+        synchronized void schedulePage(final QueryString qs) {
             if (count++ > maxPages) {
                 return;
             }
             urlsDone.add(qs);
-            String uri = checkUri(qs);
-            this.scheduledCounter.incrementAndGet();
+            final String uri = checkUri(qs);
+            scheduledCounter.incrementAndGet();
             final UrlRenderingCallable downloader = new UrlRenderingCallable(
-                    client, uri,qs);
+                    client, uri, qs);
 
             try {
                 readerPool.execute(new Harvester(downloader));
@@ -131,8 +130,8 @@ public class URLReaderService {
 
         }
 
-        private String checkUri(QueryString ssuri) {
-            String uri = uriHelper.toLink(ssuri);
+        private String checkUri(final QueryString ssuri) {
+            final String uri = uriHelper.toLink(ssuri);
             if (ssuri.getParameters().containsKey(
                     HelperStrings.SS_PAGEDATA_REQUEST) == false) {
                 return uri + "&" + HelperStrings.SS_PAGEDATA_REQUEST + "=true";
@@ -141,23 +140,24 @@ public class URLReaderService {
         }
 
         void pageComplete(final ResultPage page) {
+            synchronized (this) {
+                for (final QueryString ssUri : page.getMarkers()) {
 
-            for (final QueryString ssUri : page.getMarkers()) {
-
-                if (!urlsDone.contains(ssUri)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("adding " + ssUri);
+                    if (!urlsDone.contains(ssUri)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("adding " + ssUri);
+                        }
+                        schedulePage(ssUri);
                     }
-                    schedulePage(ssUri);
                 }
-            }
-            for (final QueryString ssUri : page.getLinks()) {
-                if (!urlsDone.contains(ssUri)) {
-                    if (log.isDebugEnabled()) {
-                        //String url = uriHelper.toLink(ssUri);
-                        log.debug("adding " + ssUri);
+                for (final QueryString ssUri : page.getLinks()) {
+                    if (!urlsDone.contains(ssUri)) {
+                        if (log.isDebugEnabled()) {
+                            //String url = uriHelper.toLink(ssUri);
+                            log.debug("adding " + ssUri);
+                        }
+                        schedulePage(ssUri);
                     }
-                    schedulePage(ssUri);
                 }
             }
             final PageletRenderedEvent event = new PageletRenderedEvent(page);
@@ -171,8 +171,8 @@ public class URLReaderService {
                     + readerPool.getQueue().size());
             //            if (executor.getActiveCount() == 1
             //                    && executor.getQueue().size() == 0) {
-            if (this.scheduledCounter.decrementAndGet() == 0) {
-                this.complete.set(true);
+            if (scheduledCounter.decrementAndGet() == 0) {
+                complete.set(true);
                 synchronized (lock) {
                     lock.notifyAll();
                 }
@@ -185,7 +185,7 @@ public class URLReaderService {
                 while (!complete.get()) {
                     try {
                         lock.wait();
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         log.warn(e, e);
                     }
                 }
@@ -205,7 +205,7 @@ public class URLReaderService {
         }
 
         public void run() {
-            
+
             try {
                 final ResultPage page;
                 page = downloader.call();
@@ -213,38 +213,10 @@ public class URLReaderService {
                     handler.visit(page);
                 }
                 scheduler.pageComplete(page);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error(e, e);
             } finally {
                 scheduler.taskFinished();
-            }
-
-        }
-
-    }
-
-    class CollectorTask implements Runnable {
-        final Future<ResultPage> future;
-
-        /**
-         * @param future
-         */
-        public CollectorTask(final Future<ResultPage> future) {
-            super();
-            this.future = future;
-        }
-
-        public void run() {
-
-            try {
-
-                final ResultPage page = future.get();
-                scheduler.pageComplete(page);
-
-            } catch (final InterruptedException e) {
-                log.error(e.getMessage(), e);
-            } catch (final ExecutionException e) {
-                log.error(e.getMessage(), e);
             }
 
         }
@@ -280,22 +252,48 @@ public class URLReaderService {
     }
 
     public void addListener(final PageletRenderingListener listener) {
-        this.listeners.add(listener);
+        listeners.add(listener);
     }
 
     public void removeListener(final PageletRenderingListener listener) {
-        this.listeners.remove(listener);
+        listeners.remove(listener);
     }
 
-    public void setHostConfig(HostConfig hostConfig) {
+    public void setHostConfig(final HostConfig hostConfig) {
         this.hostConfig = hostConfig;
-        this.uriHelper = new SSUriHelper(hostConfig.getDomain());
-        handler = new BodyHandler(uriHelper);
 
     }
 
-    public void addStartUris(Collection<String> uri) {
-        this.startUrls.addAll(uri);
+    public void addStartUris(final Collection<String> uri) {
+        startUrls.addAll(uri);
+    }
+
+    /**
+     * @return the handler
+     */
+    public BodyHandler getHandler() {
+        return handler;
+    }
+
+    /**
+     * @param handler the handler to set
+     */
+    public void setHandler(final BodyHandler handler) {
+        this.handler = handler;
+    }
+
+    /**
+     * @return the uriHelper
+     */
+    public SSUriHelper getUriHelper() {
+        return uriHelper;
+    }
+
+    /**
+     * @param uriHelper the uriHelper to set
+     */
+    public void setUriHelper(final SSUriHelper uriHelper) {
+        this.uriHelper = uriHelper;
     }
 
 }
