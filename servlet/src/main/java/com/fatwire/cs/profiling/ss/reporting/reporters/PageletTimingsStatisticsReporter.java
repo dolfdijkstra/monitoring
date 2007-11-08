@@ -20,6 +20,8 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
 
     private final Map<String, SimpleStatistics> stats = new HashMap<String, SimpleStatistics>();
 
+    private final SimpleStatistics total = new SimpleStatistics("total");
+
     private final AtomicInteger pagesDone = new AtomicInteger();
 
     /**
@@ -32,6 +34,7 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
 
     public synchronized void addToReport(final ResultPage page) {
         pagesDone.incrementAndGet();
+        total.addValue(page.getReadTime());
         final String pagename = page.getPageName();
         if (pagename != null) {
             SimpleStatistics ss = stats.get(pagename);
@@ -47,9 +50,9 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
     @Override
     public void endCollecting() {
         report.startReport();
-        report.addRow("reporting on " + pagesDone.get() + " pages");
-        final DecimalFormat df = new DecimalFormat("#,##0.00");
-        final DecimalFormat lf = new DecimalFormat("#,##0");
+        //report.addRow("reporting on " + pagesDone.get() + " pages");
+        final DecimalFormat df = new DecimalFormat("###0.00");
+        final DecimalFormat lf = new DecimalFormat("##0");
         final DateFormat dateFormat = new SimpleDateFormat("hh:mm:ss");
         int l = 0;
         for (final String s : stats.keySet()) {
@@ -71,6 +74,15 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
                     + df.format(s.getStandardDeviation());
             report.addRow(line);
         }
+        final String n = total.getName()
+                + new String(blank, 0, l - total.getName().length());
+        final String line = n + "\t" + total.getInvocations() + "\t"
+                + df.format(total.getAverage()) + "\t"
+                + dateFormat.format(new Date(total.getFirstDate())) + "\t"
+                + lf.format(total.getMaxvalue()) + "\t"
+                + df.format(total.getStandardDeviation());
+        report.addRow(line);
+
         report.finishReport();
 
     }
@@ -79,6 +91,7 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
     public void startCollecting() {
         stats.clear();
         pagesDone.set(0);
+        total.reset();
 
     }
 

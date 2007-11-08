@@ -17,9 +17,9 @@ public class PageRenderTimeReporter extends ReportDelegatingReporter {
     }
 
     public void addToReport(final ResultPage page) {
-        report.addRow("page " + page.getPageName() + " complete in "
-                + page.getReadTime() + " ms with statuscode: "
-                + page.getResponseCode() + " [" + page.getUri() + "]");
+        report.addRow("page\t" + page.getPageName() + "\tcomplete in\t"
+                + page.getReadTime() + "\tms with statuscode:\t"
+                + page.getResponseCode() + "\t[" + page.getUri() + "]");
 
     }
 
