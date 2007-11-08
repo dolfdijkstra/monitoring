@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import com.fatwire.cs.profiling.ss.QueryString;
 
 public class SSUriHelper {
-    private final Log log = LogFactory.getLog(getClass());
+    protected final Log log = LogFactory.getLog(getClass());
 
     private final String domain;
 
@@ -74,7 +74,9 @@ public class SSUriHelper {
     public QueryString linkToMap(final String link) {
 
         final URI uri = URI.create(StringEscapeUtils.unescapeXml(link));
-        log.debug(uri.getQuery());
+        if (log.isDebugEnabled()) {
+            log.debug(uri.getQuery());
+        }
         final String[] val = uri.getQuery().split("&");
         final QueryString map = new QueryString();
         for (final String v : val) {
