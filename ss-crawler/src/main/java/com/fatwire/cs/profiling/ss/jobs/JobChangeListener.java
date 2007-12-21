@@ -1,6 +1,6 @@
 package com.fatwire.cs.profiling.ss.jobs;
 
-public interface JobListener {
+public interface JobChangeListener {
 
     /**
      * Invoked after a job is scheduled

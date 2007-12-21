@@ -72,4 +72,12 @@ public class HostConfig {
         this.port = port;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return hostname +":" + port +domain;
+    }
+
 }

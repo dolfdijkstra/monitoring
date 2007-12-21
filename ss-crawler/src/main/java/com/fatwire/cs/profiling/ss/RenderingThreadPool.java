@@ -10,7 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class RenderingThreadPool extends ThreadPoolExecutor {
-    private final Log log = LogFactory.getLog(RenderingThreadPool.class);
+    private final Log log = LogFactory.getLog(getClass());
 
     private final Set<FinishedListener> listeners = new CopyOnWriteArraySet<FinishedListener>();
 
@@ -24,7 +24,8 @@ public class RenderingThreadPool extends ThreadPoolExecutor {
      */
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
-        log.debug("afterExecute: " +this.getActiveCount() + " " + getQueue().size());
+        log.debug("afterExecute: " + this.getActiveCount() + " "
+                + getQueue().size());
         if (this.getActiveCount() == 1 && getQueue().size() == 0) {
             for (FinishedListener listener : listeners) {
                 listener.finished();
@@ -49,4 +50,9 @@ public class RenderingThreadPool extends ThreadPoolExecutor {
     public void addListener(FinishedListener listener) {
         this.listeners.add(listener);
     }
+
+    public void removeListener(FinishedListener listener) {
+        this.listeners.remove(listener);
+    }
+
 }

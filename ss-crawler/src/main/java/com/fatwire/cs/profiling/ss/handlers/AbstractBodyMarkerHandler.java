@@ -3,7 +3,7 @@ package com.fatwire.cs.profiling.ss.handlers;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fatwire.cs.profiling.ss.QueryString;
+import com.fatwire.cs.profiling.ss.Pagelet;
 import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 
@@ -33,7 +33,7 @@ public abstract class AbstractBodyMarkerHandler extends AbstractBodyHandler {
 
     private void doTag(final String tag, ResultPage page) {
         final Matcher m = getTagPattern().matcher(tag);
-        final QueryString map = new QueryString();
+        final Pagelet map = new Pagelet();
         while (m.find()) {
             log.trace(m.group());
             final String x = m.group();

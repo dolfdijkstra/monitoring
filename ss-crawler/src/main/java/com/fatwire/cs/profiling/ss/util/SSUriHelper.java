@@ -11,12 +11,19 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.fatwire.cs.profiling.ss.Link;
 import com.fatwire.cs.profiling.ss.QueryString;
 
 public class SSUriHelper {
     protected final Log log = LogFactory.getLog(getClass());
 
+    public static final String SSURI_PREFIX = "SSURI";
+
+    public static final String SSURI_BLOBSERVER = "SSURIapptype=BlobServer";
+
     private final String domain;
+
+    private static final String UTF8 = "utf-8";
 
     private final URLCodec urlCodec = new URLCodec();
 
@@ -58,8 +65,6 @@ public class SSUriHelper {
                     qs.append("&");
                 }
             }
-            //qs.append(HelperStrings.SS_PAGEDATA_REQUEST);
-            //qs.append("=true");
             return qs.toString();
         } catch (EncoderException e) {
             log.warn(e);
@@ -71,21 +76,30 @@ public class SSUriHelper {
 
     }
 
-    public QueryString linkToMap(final String link) {
+    public final Link linkToMap(final String link) {
 
-        final URI uri = URI.create(StringEscapeUtils.unescapeXml(link));
+        return uriToQueryString(URI.create(StringEscapeUtils.unescapeXml(link)));
+
+    }
+
+    public Link uriToQueryString(final URI uri) {
+        String qs = uri.getQuery();
         if (log.isDebugEnabled()) {
-            log.debug(uri.getQuery());
+            log.debug(qs);
+        }
+        final Link map = new Link();
+        if (qs == null){
+            return map;
         }
         final String[] val = uri.getQuery().split("&");
-        final QueryString map = new QueryString();
+        
         for (final String v : val) {
-            if (!v.startsWith("SSURI")) {
+            if (!v.startsWith(SSURI_PREFIX)) {
                 final int t = v.indexOf('=');
                 map.addParameter(v.substring(0, t), v.substring(t + 1, v
                         .length()));
             } else {
-                if ("SSURIapptype=BlobServer".equals(v)) {
+                if (SSURI_BLOBSERVER.equals(v)) {
                     map.clear();
                     break;
                 }
@@ -94,5 +108,33 @@ public class SSUriHelper {
         return map;
 
     }
+
+    protected String getCharSet() {
+        return UTF8;
+    }
+
+//    public QueryString extractParams(final URI uri) {
+//        final String qs = uri.getRawQuery();
+//        final QueryString map = new QueryString();
+//        if (qs != null) {
+//            for (final String p : qs.split("&")) {
+//                final String[] nvp = p.split("=");
+//                try {
+//                    final String key = URLDecoder.decode(nvp[0], getCharSet());
+//                    if (nvp.length > 0) {
+//                        map.addParameter(key, URLDecoder.decode(nvp[1],
+//                                getCharSet()));
+//
+//                    } else {
+//                        map.addParameter(key, null);
+//                    }
+//                } catch (final UnsupportedEncodingException e) {
+//                    log.error(e, e);
+//                }
+//            }
+//
+//        }
+//        return map;
+//    }
 
 }

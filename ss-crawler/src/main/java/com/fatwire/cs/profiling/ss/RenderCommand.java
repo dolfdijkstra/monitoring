@@ -4,22 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.fatwire.cs.profiling.ss.domain.HostConfig;
 import com.fatwire.cs.profiling.ss.events.PageletRenderedEvent;
 import com.fatwire.cs.profiling.ss.events.PageletRenderingListener;
 import com.fatwire.cs.profiling.ss.handlers.BodyHandler;
 import com.fatwire.cs.profiling.ss.jobs.Command;
+import com.fatwire.cs.profiling.ss.jobs.ProgressMonitor;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 
 public class RenderCommand implements Command {
-    private static final Log LOG = LogFactory.getLog(RenderCommand.class);
 
-    private final List<String> queue = new ArrayList<String>();
+
+    private final List<QueryString> queue = new ArrayList<QueryString>();
 
     private int maxPages;
 
@@ -29,7 +28,7 @@ public class RenderCommand implements Command {
 
     private BodyHandler handler;
 
-    private final ThreadPoolExecutor executor;
+    private final Executor executor;
 
     private final Set<PageletRenderingListener> listeners = new CopyOnWriteArraySet<PageletRenderingListener>();
 
@@ -38,7 +37,7 @@ public class RenderCommand implements Command {
      * @param maxPages
      */
     public RenderCommand(final HostConfig hostConfig, final int maxPages,
-            final ThreadPoolExecutor executor) {
+            final Executor executor) {
         super();
         this.hostConfig = hostConfig;
         this.maxPages = maxPages;
@@ -50,11 +49,11 @@ public class RenderCommand implements Command {
         this(hostConfig, Integer.MAX_VALUE, readerPool);
     }
 
-    public void addStartUri(final String uri) {
+    public void addStartUri(final QueryString uri) {
         queue.add(uri);
     }
 
-    public void execute() {
+    public void execute(ProgressMonitor monitor) {
         if ((executor == null) || (hostConfig == null)
                 || (handler == null) || (uriHelper == null)
                 || (maxPages < 1) || queue.isEmpty()) {
@@ -83,7 +82,7 @@ public class RenderCommand implements Command {
 
         reader.addListener(readerListener);
 
-        reader.start();
+        reader.start(monitor);
         reader.removeListener(readerListener);
 
     }

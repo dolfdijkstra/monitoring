@@ -4,9 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
-import com.fatwire.cs.profiling.ss.QueryString;
+import com.fatwire.cs.profiling.ss.Link;
 
 public class DecodingSSUriHelper extends SSUriHelper {
 
@@ -15,16 +13,16 @@ public class DecodingSSUriHelper extends SSUriHelper {
     }
 
     /* (non-Javadoc)
-     * @see com.fatwire.cs.profiling.ss.util.SSUriHelper#linkToMap(java.lang.String)
+     * @see com.fatwire.cs.profiling.ss.util.SSUriHelper#uriToQueryString(java.net.URI)
      */
     @Override
-    public QueryString linkToMap(String link) {
-        final URI uri = URI.create(StringEscapeUtils.unescapeXml(link));
+    public Link uriToQueryString(URI uri) {
+
         if (log.isDebugEnabled()) {
             log.debug(uri.getQuery());
         }
         final String[] val = uri.getQuery().split("&");
-        final QueryString map = new QueryString();
+        final Link map = new Link();
         for (final String v : val) {
             if (!v.startsWith("SSURI")) {
                 final int t = v.indexOf('=');

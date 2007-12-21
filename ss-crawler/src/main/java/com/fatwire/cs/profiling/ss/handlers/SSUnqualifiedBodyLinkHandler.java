@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import com.fatwire.cs.profiling.ss.Link;
 import com.fatwire.cs.profiling.ss.QueryString;
 import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
@@ -45,7 +46,7 @@ public class SSUnqualifiedBodyLinkHandler extends AbstractBodyHandler {
             //final URI uri = new URI(link);
             log.trace(uri.getQuery());
             final String[] val = uri.getQuery().split("&");
-            final QueryString map = new QueryString();
+            final Link map = new Link();
             for (final String v : val) {
                 if (v.startsWith("blobcol=")) {
                     map.clear();

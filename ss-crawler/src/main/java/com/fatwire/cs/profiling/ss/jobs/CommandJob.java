@@ -3,10 +3,9 @@ package com.fatwire.cs.profiling.ss.jobs;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-
 public class CommandJob implements Job {
 
-    private final Set<JobListener> listeners = new CopyOnWriteArraySet<JobListener>();
+    private final Set<JobChangeListener> listeners = new CopyOnWriteArraySet<JobChangeListener>();
 
     private final Command command;
 
@@ -20,24 +19,27 @@ public class CommandJob implements Job {
     }
 
     public void schedule() {
+    }
+
+    public void run(ProgressMonitor monitor) {
         final JobStartedEvent event = new JobStartedEvent(this);
-        for (final JobListener listener : listeners) {
+        for (final JobChangeListener listener : listeners) {
             listener.jobStarted(event);
         }
 
-        command.execute();
+        command.execute(monitor);
         final JobFinishedEvent finishedEvent = new JobFinishedEvent(this);
-        for (final JobListener listener : listeners) {
+        for (final JobChangeListener listener : listeners) {
 
             listener.jobFinished(finishedEvent);
         }
     }
 
-    public void addListener(final JobListener listener) {
+    public void addListener(final JobChangeListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(final JobListener listener) {
+    public void removeListener(final JobChangeListener listener) {
         listeners.remove(listener);
     }
 

@@ -5,8 +5,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,6 +24,7 @@ import com.fatwire.cs.profiling.ss.domain.HostConfig;
 import com.fatwire.cs.profiling.ss.events.PageletRenderedEvent;
 import com.fatwire.cs.profiling.ss.events.PageletRenderingListener;
 import com.fatwire.cs.profiling.ss.handlers.BodyHandler;
+import com.fatwire.cs.profiling.ss.jobs.ProgressMonitor;
 import com.fatwire.cs.profiling.ss.util.HelperStrings;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 
@@ -37,18 +39,17 @@ public class URLReaderService {
 
     private BodyHandler handler;
 
-
     private HttpClient client;
 
     private int maxPages = Integer.MAX_VALUE;
 
     private final Set<PageletRenderingListener> listeners = new CopyOnWriteArraySet<PageletRenderingListener>();
 
-    private final List<String> startUrls = new ArrayList<String>();
+    private final List<QueryString> startUrls = new ArrayList<QueryString>();
 
     private final Scheduler scheduler;
 
-    public URLReaderService(final ThreadPoolExecutor readerPool) {
+    public URLReaderService(final Executor readerPool) {
         super();
         scheduler = new Scheduler(readerPool);
 
@@ -77,23 +78,26 @@ public class URLReaderService {
         client.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
     }
 
-    public void start() {
+    public void start(final ProgressMonitor monitor) {
         initClient();
 
-        for (final String thingToDo : startUrls) {
+        monitor.beginTask("Crawling on " + hostConfig.toString(),
+                maxPages == Integer.MAX_VALUE ? -1 : maxPages);
+        scheduler.monitor = monitor;
+        for (final QueryString thingToDo : startUrls) {
 
-            scheduler.schedulePage(uriHelper.linkToMap(thingToDo));
+            scheduler.schedulePage(thingToDo);
         }
         scheduler.waitForlAllTasksToFinish();
+        monitor.done();
 
     }
 
     class Scheduler {
-        //        private final List<QueryString> urlsToDo = new ArrayList<QueryString>();
 
         private final Set<QueryString> urlsDone = new HashSet<QueryString>();
 
-        private final ThreadPoolExecutor readerPool;
+        private final Executor executor;
 
         private final AtomicBoolean complete = new AtomicBoolean(false);
 
@@ -103,16 +107,21 @@ public class URLReaderService {
 
         private volatile int count = 0;
 
+        private ProgressMonitor monitor;
+
         /**
          * @param executor
          */
-        public Scheduler(final ThreadPoolExecutor readerPool) {
+        public Scheduler(final Executor readerPool) {
             super();
-            this.readerPool = readerPool;
+            executor = readerPool;
         }
 
         synchronized void schedulePage(final QueryString qs) {
             if (count++ > maxPages) {
+                return;
+            }
+            if (monitor.isCanceled()) {
                 return;
             }
             urlsDone.add(qs);
@@ -122,7 +131,8 @@ public class URLReaderService {
                     client, uri, qs);
 
             try {
-                readerPool.execute(new Harvester(downloader));
+                executor.execute(new Harvester(downloader, qs.toString(),
+                        monitor));
 
             } catch (final Exception e) {
                 log.error(e.getMessage(), e);
@@ -167,10 +177,7 @@ public class URLReaderService {
         }
 
         public void taskFinished() {
-            log.debug(readerPool.getActiveCount() + " "
-                    + readerPool.getQueue().size());
-            //            if (executor.getActiveCount() == 1
-            //                    && executor.getQueue().size() == 0) {
+            log.debug("Active workers: " + scheduledCounter.get());
             if (scheduledCounter.decrementAndGet() == 0) {
                 complete.set(true);
                 synchronized (lock) {
@@ -189,24 +196,36 @@ public class URLReaderService {
                         log.warn(e, e);
                     }
                 }
+
             }
+
         }
     }
 
     class Harvester implements Runnable {
-        final UrlRenderingCallable downloader;
+        private final Callable<ResultPage> downloader;
+
+        private final String taskInfo;
+
+        private final ProgressMonitor monitor;
 
         /**
          * @param downloader
          */
-        public Harvester(final UrlRenderingCallable downloader) {
+        public Harvester(final Callable<ResultPage> downloader,
+                final String taskInfo, final ProgressMonitor monitor) {
             super();
             this.downloader = downloader;
+            this.taskInfo = taskInfo;
+            this.monitor = monitor;
         }
 
         public void run() {
-
+            if (monitor.isCanceled()) {
+                return;
+            }
             try {
+                monitor.subTask(taskInfo);
                 final ResultPage page;
                 page = downloader.call();
                 if (page.getBody() != null) {
@@ -264,7 +283,7 @@ public class URLReaderService {
 
     }
 
-    public void addStartUris(final Collection<String> uri) {
+    public void addStartUris(final Collection<QueryString> uri) {
         startUrls.addAll(uri);
     }
 

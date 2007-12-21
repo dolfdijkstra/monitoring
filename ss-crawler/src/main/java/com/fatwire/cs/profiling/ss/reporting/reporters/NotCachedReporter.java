@@ -35,7 +35,7 @@ public class NotCachedReporter extends ReportDelegatingReporter {
             if (shouldCache(page.getResponseHeaders())) {
                 report.addRow("not caching while we should\t" + page.getUri());
             } else {
-                report.addRow("not caching \t" + page.getUri());
+                report.addRow("not caching\t" + page.getUri());
             }
 
         }

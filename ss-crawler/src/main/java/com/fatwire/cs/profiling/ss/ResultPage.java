@@ -65,22 +65,22 @@ public class ResultPage {
         return uri;
     }
 
-    public void addLink(QueryString uri) {
+    public void addLink(Link uri) {
         this.links.add(uri);
 
     }
 
-    public void addLinks(Collection<QueryString> uris) {
+    public void addLinks(Collection<Link> uris) {
         this.links.addAll(uris);
 
     }
 
-    public void addMarker(QueryString uri) {
+    public void addMarker(Pagelet uri) {
         this.markers.add(uri);
 
     }
 
-    public void addMarkers(Collection<QueryString> uris) {
+    public void addMarkers(Collection<Pagelet> uris) {
         this.markers.addAll(uris);
 
     }

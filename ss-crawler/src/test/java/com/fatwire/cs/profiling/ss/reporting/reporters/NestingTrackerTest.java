@@ -4,6 +4,8 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import com.fatwire.cs.profiling.ss.Link;
+import com.fatwire.cs.profiling.ss.Pagelet;
 import com.fatwire.cs.profiling.ss.QueryString;
 import com.fatwire.cs.profiling.ss.ResultPage;
 
@@ -19,10 +21,10 @@ public class NestingTrackerTest extends TestCase {
 
     public void testAdd() {
         NestingTracker tracker = new NestingTracker();
-        QueryString qs = new QueryString();
+        Link qs = new Link();
         qs.addParameter("pagename", "XXX");
 
-        QueryString inner = new QueryString();
+        Pagelet inner = new Pagelet();
         inner.addParameter("pagename", "YYY");
         inner.addParameter("c", "Page");
 
@@ -38,10 +40,10 @@ public class NestingTrackerTest extends TestCase {
 
     public void testGetKeys() {
         NestingTracker tracker = new NestingTracker();
-        QueryString qs = new QueryString();
+        QueryString qs = new Link();
         qs.addParameter("pagename", "XXX");
 
-        QueryString inner = new QueryString();
+        Pagelet inner = new Pagelet();
         inner.addParameter("pagename", "YYY");
         inner.addParameter("c", "Page");
 
@@ -58,10 +60,10 @@ public class NestingTrackerTest extends TestCase {
 
     public void testGetNestingLevel() {
         NestingTracker tracker = new NestingTracker();
-        QueryString qs = new QueryString();
+        QueryString qs = new Link();
         qs.addParameter("pagename", "XXX");
 
-        QueryString inner = new QueryString();
+        Pagelet inner = new Pagelet();
         inner.addParameter("pagename", "YYY");
         inner.addParameter("c", "Page");
 
