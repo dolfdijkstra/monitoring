@@ -28,11 +28,13 @@ public class NestingReporter extends ReportDelegatingReporter {
     @Override
     public void endCollecting() {
         super.startCollecting();
+        report.addRow("treshold\t" + threshold);
+        report.addRow("uri\tnesting");
 
         for (QueryString qs : tracker.getKeys()) {
             int level = tracker.getNestingLevel(qs);
             if (level >= threshold) {
-                report.addRow(qs.toString() + " has a nesting level of "
+                report.addRow(qs.toString() + "\t"
                         + level);
             }
         }

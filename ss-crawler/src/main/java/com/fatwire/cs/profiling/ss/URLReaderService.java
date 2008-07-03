@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -65,7 +64,18 @@ public class URLReaderService {
                 hostConfig.getPort());
         client.getParams().setParameter(HttpMethodParams.USER_AGENT,
                 "SS-Crawler-0.9");
+
+        // RFC 2101 cookie management spec is used per default
+        // to parse, validate, format & match cookies
+        //client.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
+        //client.getParams().setCookiePolicy(CookiePolicy.DEFAULT);
+        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+
+        //client.getParams().makeStrict();
+        client.getParams().getDefaults().setBooleanParameter(
+                HttpMethodParams.SINGLE_COOKIE_HEADER, true);
         final HttpState initialState = new HttpState();
+
         initialState.addCookie(new Cookie(hostConfig.getHostname(),
                 HelperStrings.SS_CLIENT_INDICATOR, Boolean.TRUE.toString(),
                 hostConfig.getDomain(), -1, false));
@@ -73,9 +83,6 @@ public class URLReaderService {
         // set state
         client.setState(initialState);
 
-        // RFC 2101 cookie management spec is used per default
-        // to parse, validate, format & match cookies
-        client.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
     }
 
     public void start(final ProgressMonitor monitor) {
@@ -118,21 +125,29 @@ public class URLReaderService {
         }
 
         synchronized void schedulePage(final QueryString qs) {
-            if (count++ > maxPages) {
-                return;
-            }
             if (monitor.isCanceled()) {
                 return;
             }
+
+            if (qs instanceof Link) {
+                if (++count > maxPages) {
+                    return;
+                }
+            }
             urlsDone.add(qs);
             final String uri = checkUri(qs);
+
             scheduledCounter.incrementAndGet();
             final UrlRenderingCallable downloader = new UrlRenderingCallable(
                     client, uri, qs);
 
             try {
+                int priority = 0;
+                if (qs instanceof Link) {
+                    priority = 5;
+                }
                 executor.execute(new Harvester(downloader, qs.toString(),
-                        monitor));
+                        monitor, priority));
 
             } catch (final Exception e) {
                 log.error(e.getMessage(), e);
@@ -142,9 +157,19 @@ public class URLReaderService {
 
         private String checkUri(final QueryString ssuri) {
             final String uri = uriHelper.toLink(ssuri);
-            if (ssuri.getParameters().containsKey(
-                    HelperStrings.SS_PAGEDATA_REQUEST) == false) {
-                return uri + "&" + HelperStrings.SS_PAGEDATA_REQUEST + "=true";
+            if (true) {
+                if (ssuri.getParameters().containsKey(
+                        HelperStrings.SS_PAGEDATA_REQUEST) == false) {
+                    return uri + "&" + HelperStrings.SS_PAGEDATA_REQUEST
+                            + "=true";
+                }
+            } else {
+                if (ssuri.getParameters().containsKey(
+                        HelperStrings.SS_CLIENT_INDICATOR) == false) {
+                    return uri + "&" + HelperStrings.SS_CLIENT_INDICATOR
+                            + "=true";
+                }
+
             }
             return uri;
         }
@@ -202,22 +227,26 @@ public class URLReaderService {
         }
     }
 
-    class Harvester implements Runnable {
-        private final Callable<ResultPage> downloader;
+    class Harvester implements Runnable, Comparable<Harvester> {
+        private final UrlRenderingCallable downloader;
 
         private final String taskInfo;
 
         private final ProgressMonitor monitor;
 
+        private final int priority;
+
         /**
          * @param downloader
          */
-        public Harvester(final Callable<ResultPage> downloader,
-                final String taskInfo, final ProgressMonitor monitor) {
+        public Harvester(final UrlRenderingCallable downloader,
+                final String taskInfo, final ProgressMonitor monitor,
+                final int priority) {
             super();
             this.downloader = downloader;
             this.taskInfo = taskInfo;
             this.monitor = monitor;
+            this.priority = priority;
         }
 
         public void run() {
@@ -236,6 +265,15 @@ public class URLReaderService {
                 log.error(e, e);
             } finally {
                 scheduler.taskFinished();
+            }
+
+        }
+
+        public int compareTo(Harvester o) {
+            if (priority != o.priority) {
+                return new Integer(priority).compareTo(o.priority);
+            } else {
+                return downloader.getUri().compareTo(o.downloader.getUri());
             }
 
         }

@@ -2,11 +2,16 @@ package com.fatwire.cs.profiling.ss;
 
 import java.io.File;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.apache.log4j.xml.DOMConfigurator;
+
 import com.fatwire.cs.profiling.ss.reporting.Reporter;
+import com.fatwire.cs.profiling.ss.reporting.reporters.DefaultArgumentsAsPageCriteriaReporter;
 import com.fatwire.cs.profiling.ss.reporting.reporters.InnerLinkReporter;
 import com.fatwire.cs.profiling.ss.reporting.reporters.InnerPageletReporter;
 import com.fatwire.cs.profiling.ss.reporting.reporters.LinkCollectingReporter;
@@ -24,34 +29,67 @@ import com.fatwire.cs.profiling.ss.reporting.reporters.RootElementReporter;
 import com.fatwire.cs.profiling.ss.reporting.reports.FileReport;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
 import com.fatwire.cs.profiling.ss.util.TempDir;
+import com.fatwire.cs.profiling.ss.util.UriHelperFactory;
 
 public class App {
 
-
     /**
      * @param args
+     * @throws Exception 
      */
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws Exception {
 
         if (args.length < 2) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "Usage: java "
+                            + App.class.getName()
+                            + " -host http://localhost:8080/cs/ -startUri \"/cs/ContentServer?pagename=...\" -reportDir <report dir> -max <max pages>");
+        }
+        DOMConfigurator.configure("log4j.xml");
+        Crawler crawler = new Crawler();
+        File path = null;
+        String factory = null;
+        for (int i = 0; i < args.length; i++) {
+            if ("-host".equals(args[i])) {
+                crawler.setHost(args[++i]);
+            } else if ("-startUri".equals(args[i])) {
+                crawler.setStartUri(URI.create(args[++i]));
+            } else if ("-reportDir".equals(args[i])) {
+                path = new File(args[++i]);
+            } else if ("-max".equals(args[i])) {
+                crawler.setMaxPages(Integer.parseInt(args[++i]));
+            } else if ("-uriHelperFactory".equals(args[i])) {
+                factory = args[++i];
+            }
+
         }
 
-        Crawler crawler = new Crawler();
-        crawler.setHost(args[0]);
-        crawler.setStartUri(URI.create(args[1]));
-        if (args.length > 2) {
-            crawler.setMaxPages(Integer.parseInt(args[2]));
+        if (path == null) {
+            path = App.getOutputDir();
         }
-        final ThreadPoolExecutor readerPool = new RenderingThreadPool();
+        
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd-HHmm");
+        path = new File(path,df.format(new Date()));
+        path.mkdirs();
+        SSUriHelper helper = null;
+
+        if (factory != null) {
+            UriHelperFactory f = (UriHelperFactory) (Class.forName(factory)
+                    .newInstance());
+            helper=f.create(crawler.getStartUri().getPath());
+        } else {
+            helper = new SSUriHelper(crawler.getStartUri().getPath());
+        }
+        final ThreadPoolExecutor readerPool = new RenderingThreadPool(5);
 
         crawler.setExecutor(readerPool);
-        crawler.setReporters(createReporters(App.getOutputDir()));
-        crawler.setUriHelper(new SSUriHelper(URI.create(args[0]).getPath()));
+        crawler.setReporters(createReporters(path, helper));
+        crawler.setUriHelper(helper);
         crawler.work();
         readerPool.shutdown();
 
     }
+
     private static File getOutputDir() {
         final File outputDir = new File(TempDir.getTempDir(App.class), Long
                 .toString(System.currentTimeMillis()));
@@ -59,32 +97,31 @@ public class App {
         return outputDir;
     }
 
-
-    private static List<Reporter> createReporters(File outputDir) {
+    private static List<Reporter> createReporters(File outputDir,
+            SSUriHelper helper) {
 
         List<Reporter> reporters = new ArrayList<Reporter>();
         reporters.add(new LinkCollectingReporter(new FileReport(outputDir,
-                "links.txt")));
+                "pagelets.txt")));
         reporters.add(new OuterLinkCollectingReporter(new FileReport(outputDir,
-        "outer-links.txt")));
+                "browsable-links.txt"), helper));
 
         reporters.add(new PageCollectingReporter(new File(outputDir, "pages")));
 
         reporters.add(new PageletTimingsStatisticsReporter(new FileReport(
-                outputDir, "pagelet-stats.txt")));
+                outputDir, "pagelet-stats.xls")));
 
         reporters.add(new PageCriteriaReporter(new FileReport(outputDir,
                 "pagecriteria.txt")));
-//        reporters.add(new PageRenderTimeReporter(new ReportCollection(
-//                new StdOutReport(), new FileReport(outputDir, "timings.txt"))));
-        reporters.add(new PageRenderTimeReporter(new FileReport(outputDir, "timings.txt")));
+        reporters.add(new PageRenderTimeReporter(new FileReport(outputDir,
+                "pagelet-timings.txt")));
 
         reporters.add(new RootElementReporter(new FileReport(outputDir,
                 "root-elements.txt")));
-        reporters.add(new NumberOfInnerPageletsReporter(
-                new FileReport(outputDir, "num-inner-pagelets.txt"), 12));
+        reporters.add(new NumberOfInnerPageletsReporter(new FileReport(
+                outputDir, "num-inner-pagelets.txt"), 12));
         reporters.add(new Non200ResponseCodeReporter(new FileReport(outputDir,
-                "non-200.txt")));
+                "non-200-repsonse.txt")));
         reporters.add(new InnerPageletReporter(new FileReport(outputDir,
                 "inner-pagelets.txt")));
 
@@ -97,9 +134,9 @@ public class App {
                 "pagelet-only.txt")));
         reporters.add(new NotCachedReporter(new FileReport(outputDir,
                 "not-cached.txt")));
+        reporters.add(new DefaultArgumentsAsPageCriteriaReporter(new FileReport(outputDir,
+        "defaultArgumentsAsPageCriteriaReporter.txt")));
         return reporters;
     }
-
-
 
 }

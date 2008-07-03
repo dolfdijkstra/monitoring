@@ -93,4 +93,11 @@ public class UrlRenderingCallable implements Callable<ResultPage> {
         return builder.toString();
     }
 
+    /**
+     * @return the uri
+     */
+    public String getUri() {
+        return uri;
+    }
+
 }

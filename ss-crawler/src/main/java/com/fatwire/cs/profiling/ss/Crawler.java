@@ -30,7 +30,6 @@ public class Crawler {
         final HostConfig hc = createHostConfig(URI.create(host));
         final RenderCommand command = new RenderCommand(hc, maxPages, executor);
         command.addStartUri(uriHelper.uriToQueryString(startUri));
-        //final SSUriHelper uriHelper = new DecodingSSUriHelper(hc.getDomain());
         command.setUriHelper(uriHelper);
         command.setHandler(new BodyHandler(uriHelper));
 
@@ -52,25 +51,6 @@ public class Crawler {
             reporter.endCollecting();
         }
 
-        //        final CommandJob job = new CommandJob(command);
-        //        job.addListener(reportingListener);
-        //        job.addListener(new JobChangeListener() {
-        //
-        //            public void jobFinished(final JobFinishedEvent event) {
-        //                executor.shutdown();
-        //
-        //            }
-        //
-        //            public void jobScheduled(final JobScheduledEvent event) {
-        //
-        //            }
-        //
-        //            public void jobStarted(final JobStartedEvent event) {
-        //
-        //            }
-        //
-        //        });
-        //        job.schedule();
     }
 
     private HostConfig createHostConfig(final URI uri) {

@@ -17,10 +17,21 @@ public class PageRenderTimeReporter extends ReportDelegatingReporter {
     }
 
     public void addToReport(final ResultPage page) {
-        report.addRow("page\t" + page.getPageName() + "\tcomplete in\t"
-                + page.getReadTime() + "\tms with statuscode:\t"
-                + page.getResponseCode() + "\t[" + page.getUri() + "]");
+        report.addRow(page.getPageName() + "\t"
+                + page.getReadTime() + "\t"
+                + page.getResponseCode() + "\t" + page.getUri());
 
+    }
+
+    /* (non-Javadoc)
+     * @see com.fatwire.cs.profiling.ss.reporting.reporters.ReportDelegatingReporter#startCollecting()
+     */
+    @Override
+    public void startCollecting() {
+        super.startCollecting();
+        report.addRow("pagename\tdownload time\tstatuscode\targuments");
+                
+        
     }
 
 }

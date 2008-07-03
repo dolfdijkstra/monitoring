@@ -2,7 +2,7 @@ package com.fatwire.cs.profiling.ss;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -14,8 +14,8 @@ public class RenderingThreadPool extends ThreadPoolExecutor {
 
     private final Set<FinishedListener> listeners = new CopyOnWriteArraySet<FinishedListener>();
 
-    public RenderingThreadPool() {
-        super(10, 20, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    public RenderingThreadPool(int threadSize) {
+        super(threadSize, threadSize, 60, TimeUnit.SECONDS, new PriorityBlockingQueue<Runnable>(5000));
 
     }
 
@@ -24,8 +24,10 @@ public class RenderingThreadPool extends ThreadPoolExecutor {
      */
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
-        log.debug("afterExecute: " + this.getActiveCount() + " "
-                + getQueue().size());
+        if (log.isDebugEnabled()) {
+            log.debug("afterExecute: " + this.getActiveCount() + " "
+                    + getQueue().size());
+        }
         if (this.getActiveCount() == 1 && getQueue().size() == 0) {
             for (FinishedListener listener : listeners) {
                 listener.finished();

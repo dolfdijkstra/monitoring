@@ -8,7 +8,7 @@ import com.fatwire.cs.profiling.ss.Link;
 
 public class DecodingSSUriHelper extends SSUriHelper {
 
-    public DecodingSSUriHelper(String domain) {
+    public DecodingSSUriHelper(final String domain) {
         super(domain);
     }
 
@@ -16,10 +16,10 @@ public class DecodingSSUriHelper extends SSUriHelper {
      * @see com.fatwire.cs.profiling.ss.util.SSUriHelper#uriToQueryString(java.net.URI)
      */
     @Override
-    public Link uriToQueryString(URI uri) {
+    public Link uriToQueryString(final URI uri) {
 
         if (log.isDebugEnabled()) {
-            log.debug(uri.getQuery());
+            log.debug(uri.getRawQuery());
         }
         final String[] val = uri.getQuery().split("&");
         final Link map = new Link();
@@ -27,11 +27,11 @@ public class DecodingSSUriHelper extends SSUriHelper {
             if (!v.startsWith("SSURI")) {
                 final int t = v.indexOf('=');
                 try {
-                    map.addParameter(URLDecoder.decode(v.substring(0, t),
-                            "UTF-8"), URLDecoder.decode(v.substring(t + 1, v
-
-                    .length()), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
+                    String key = URLDecoder.decode(v.substring(0, t), "UTF-8");
+                    String value = URLDecoder.decode(v.substring(t + 1, v
+                            .length()), "UTF-8");
+                    map.addParameter(key, value);
+                } catch (final UnsupportedEncodingException e) {
                     log.error(e, e);
                 }
             } else {

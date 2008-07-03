@@ -2,9 +2,9 @@ package com.fatwire.cs.profiling.ss.reporting.reporters;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.httpclient.Header;
 
@@ -15,7 +15,7 @@ import com.fatwire.cs.profiling.ss.util.HelperStrings;
 public class DefaultArgumentsAsPageCriteriaReporter extends
         ReportDelegatingReporter {
 
-    private Set<String> pagenamesDone = new HashSet<String>();
+    private Set<String> pagenamesDone = new CopyOnWriteArraySet<String>();
 
     public static final String DEFAULT_ARGUMENTS = HelperStrings.CS_TO_SS_RESPONSE_HEADER_PREFIX
             + "defaultarguments";
@@ -35,13 +35,13 @@ public class DefaultArgumentsAsPageCriteriaReporter extends
                     .getResponseHeaders());
             for (final Header header : page.getResponseHeaders()) {
                 if (header.getName().startsWith(DEFAULT_ARGUMENTS)) {
-                    String v = header.getValue().split("|")[0];
+                    String v = header.getValue().split("\\|",2)[0];
                     if (!pageCriteria.contains(v)) {
                         report
                                 .addRow(page.getPageName()
-                                        + "has "
+                                        + " has '"
                                         + v
-                                        + " defined as a default argument but not defined as pagecriteria");
+                                        + "' defined as a default argument but not defined as pagecriteria");
                     }
                 }
 

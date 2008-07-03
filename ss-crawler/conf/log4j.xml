@@ -9,7 +9,7 @@
         </layout>
     </appender>
     <appender name="filelog" class="org.apache.log4j.RollingFileAppender">
-        <param name="file" value="logs/file.log" />
+        <param name="file" value="logs/crawler.log" />
         <param name="MaxFileSize" value="50MB" />
         <param name="MaxBackupIndex" value="15" />
         <param name="append" value="false" />
@@ -25,6 +25,11 @@
         <appender-ref ref="filelog" />
 
     </logger>
+    <logger name="com.fatwire.cs.profiling.ss">
+        <level value="info"></level>
+    </logger>
+
+    
     <logger name="com.fatwire.cs.profiling.ss.handlers">
         <level value="info"></level>
 

@@ -3,24 +3,22 @@
  */
 package com.fatwire.cs.profiling.ss.reporting.reporters;
 
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.math.stat.descriptive.SynchronizedSummaryStatistics;
 
 import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.reporting.Report;
-import com.fatwire.cs.profiling.ss.statistics.SimpleStatistics;
 
 public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
 
-    private final Map<String, SimpleStatistics> stats = new HashMap<String, SimpleStatistics>();
+    private final Map<String, SynchronizedSummaryStatistics> stats = new ConcurrentHashMap<String, SynchronizedSummaryStatistics>();
 
-    private final SimpleStatistics total = new SimpleStatistics("total");
+    private final SynchronizedSummaryStatistics total = new SynchronizedSummaryStatistics();
 
     private final AtomicInteger pagesDone = new AtomicInteger();
 
@@ -37,9 +35,9 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
         total.addValue(page.getReadTime());
         final String pagename = page.getPageName();
         if (pagename != null) {
-            SimpleStatistics ss = stats.get(pagename);
+            SynchronizedSummaryStatistics ss = stats.get(pagename);
             if (ss == null) {
-                ss = new SimpleStatistics(pagename);
+                ss = new SynchronizedSummaryStatistics();
                 stats.put(pagename, ss);
             }
             ss.addValue(page.getReadTime());
@@ -53,7 +51,7 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
         //report.addRow("reporting on " + pagesDone.get() + " pages");
         final DecimalFormat df = new DecimalFormat("###0.00");
         final DecimalFormat lf = new DecimalFormat("##0");
-        final DateFormat dateFormat = new SimpleDateFormat("hh:mm:ss");
+   //     final DateFormat dateFormat = new SimpleDateFormat("hh:mm:ss");
         int l = 0;
         for (final String s : stats.keySet()) {
             l = Math.max(s.length(), l);
@@ -61,26 +59,27 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
         final char[] blank = new char[l];
         Arrays.fill(blank, ' ');
         final String header = "pagename" + new String(blank, 0, l - 8)
-                + "\tinvocations\taverage\tfirst\tmax\tstandard-deviation";
+                + "\tinvocations\taverage\tmin\tmax\tstandard-deviation";
         report.addRow(header);
 
-        for (final SimpleStatistics s : stats.values()) {
-            final String n = s.getName()
-                    + new String(blank, 0, l - s.getName().length());
-            final String line = n + "\t" + s.getInvocations() + "\t"
-                    + df.format(s.getAverage()) + "\t"
-                    + dateFormat.format(new Date(s.getFirstDate())) + "\t"
-                    + lf.format(s.getMaxvalue()) + "\t"
+        for (final Map.Entry<String, SynchronizedSummaryStatistics> e : stats
+                .entrySet()) {
+            SynchronizedSummaryStatistics s = e.getValue();
+
+            final String n = e.getKey()
+                    + new String(blank, 0, l - e.getKey().length());
+            final String line = n + "\t" + s.getN() + "\t"
+                    + df.format(s.getMean()) + "\t" + lf.format(s.getMin())
+                    + "\t" + lf.format(s.getMax()) + "\t"
                     + df.format(s.getStandardDeviation());
             report.addRow(line);
         }
-        final String n = total.getName()
-                + new String(blank, 0, l - total.getName().length());
-        final String line = n + "\t" + total.getInvocations() + "\t"
-                + df.format(total.getAverage()) + "\t"
-                + dateFormat.format(new Date(total.getFirstDate())) + "\t"
-                + lf.format(total.getMaxvalue()) + "\t"
-                + df.format(total.getStandardDeviation());
+        final String n = "total" + new String(blank, 0, l - "total".length());
+        final String line = n + "\t" + total.getN() + "\t"
+                + df.format(total.getMean()) + "\t"
+                //+ dateFormat.format(new Date(total.getFirstDate())) + "\t"
+                + lf.format(total.getMin()) + "\t" + lf.format(total.getMax())
+                + "\t" + df.format(total.getStandardDeviation());
         report.addRow(line);
 
         report.finishReport();
@@ -91,7 +90,7 @@ public class PageletTimingsStatisticsReporter extends ReportDelegatingReporter {
     public void startCollecting() {
         stats.clear();
         pagesDone.set(0);
-        total.reset();
+        total.clear();
 
     }
 

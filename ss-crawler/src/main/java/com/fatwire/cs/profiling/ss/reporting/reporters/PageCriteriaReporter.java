@@ -12,6 +12,7 @@ import org.apache.commons.httpclient.Header;
 
 import com.fatwire.cs.profiling.ss.ResultPage;
 import com.fatwire.cs.profiling.ss.reporting.Report;
+import com.fatwire.cs.profiling.ss.util.CacheHelper;
 import com.fatwire.cs.profiling.ss.util.HelperStrings;
 
 public class PageCriteriaReporter extends ReportDelegatingReporter {
@@ -28,6 +29,10 @@ public class PageCriteriaReporter extends ReportDelegatingReporter {
         //check if this pagelet should be cached (is cacheable)
         if (page.getBody().endsWith(HelperStrings.STATUS_NOTCACHED)) {
             return;
+        }else {
+            if (!CacheHelper.shouldCache(page.getResponseHeaders())) {
+                return; //page should not be cached based on SiteCatalog info 
+            }
         }
         final Header[] headers = page.getResponseHeaders();
         for (final Header header : headers) {

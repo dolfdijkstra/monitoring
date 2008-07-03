@@ -19,20 +19,20 @@ public class SSUriHelper {
 
     public static final String SSURI_PREFIX = "SSURI";
 
-    public static final String SSURI_BLOBSERVER = "SSURIapptype=BlobServer";
+    public static final String SSURI_BLOBSERVER = SSURI_PREFIX +"apptype=BlobServer";
 
-    private final String domain;
+    private final String path;
 
     private static final String UTF8 = "utf-8";
 
     private final URLCodec urlCodec = new URLCodec();
 
     /**
-     * @param domain
+     * @param path
      */
-    public SSUriHelper(final String domain) {
+    public SSUriHelper(final String path) {
         super();
-        this.domain = domain;
+        this.path = path;
     }
 
     public String toLink(QueryString uri) {
@@ -45,8 +45,8 @@ public class SSUriHelper {
             map.remove(HelperStrings.CACHECONTROL);
             map.remove(HelperStrings.RENDERMODE);
             final StringBuilder qs = new StringBuilder();
-            qs.append(domain);
-            qs.append("ContentServer");
+            qs.append(path);
+            //qs.append("ContentServer");
             qs.append("?");
             for (final Iterator<Map.Entry<String, String>> i = map.entrySet()
                     .iterator(); i.hasNext();) {
@@ -88,11 +88,11 @@ public class SSUriHelper {
             log.debug(qs);
         }
         final Link map = new Link();
-        if (qs == null){
+        if (qs == null) {
             return map;
         }
         final String[] val = uri.getQuery().split("&");
-        
+
         for (final String v : val) {
             if (!v.startsWith(SSURI_PREFIX)) {
                 final int t = v.indexOf('=');
@@ -112,29 +112,5 @@ public class SSUriHelper {
     protected String getCharSet() {
         return UTF8;
     }
-
-//    public QueryString extractParams(final URI uri) {
-//        final String qs = uri.getRawQuery();
-//        final QueryString map = new QueryString();
-//        if (qs != null) {
-//            for (final String p : qs.split("&")) {
-//                final String[] nvp = p.split("=");
-//                try {
-//                    final String key = URLDecoder.decode(nvp[0], getCharSet());
-//                    if (nvp.length > 0) {
-//                        map.addParameter(key, URLDecoder.decode(nvp[1],
-//                                getCharSet()));
-//
-//                    } else {
-//                        map.addParameter(key, null);
-//                    }
-//                } catch (final UnsupportedEncodingException e) {
-//                    log.error(e, e);
-//                }
-//            }
-//
-//        }
-//        return map;
-//    }
 
 }
