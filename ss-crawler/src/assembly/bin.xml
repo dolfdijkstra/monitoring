@@ -18,7 +18,7 @@
         </fileSet>
         <fileSet>
             <directory>conf</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/conf</outputDirectory>
             <includes>
                 <include>*.xml</include>
             </includes>

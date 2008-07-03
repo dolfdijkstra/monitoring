@@ -28,7 +28,6 @@ import com.fatwire.cs.profiling.ss.reporting.reporters.PageletTimingsStatisticsR
 import com.fatwire.cs.profiling.ss.reporting.reporters.RootElementReporter;
 import com.fatwire.cs.profiling.ss.reporting.reports.FileReport;
 import com.fatwire.cs.profiling.ss.util.SSUriHelper;
-import com.fatwire.cs.profiling.ss.util.TempDir;
 import com.fatwire.cs.profiling.ss.util.UriHelperFactory;
 
 public class App {
@@ -43,17 +42,18 @@ public class App {
             throw new IllegalArgumentException(
                     "Usage: java "
                             + App.class.getName()
-                            + " -host http://localhost:8080/cs/ -startUri \"/cs/ContentServer?pagename=...\" -reportDir <report dir> -max <max pages>");
+                            + " -startUri \"http://localhost:8080/cs/ContentServer?pagename=...\" -reportDir <report dir> -max <max pages>");
         }
-        DOMConfigurator.configure("log4j.xml");
+        DOMConfigurator.configure("conf/log4j.xml");
         Crawler crawler = new Crawler();
         File path = null;
         String factory = null;
+        URI startUri = null;
         for (int i = 0; i < args.length; i++) {
             if ("-host".equals(args[i])) {
                 crawler.setHost(args[++i]);
             } else if ("-startUri".equals(args[i])) {
-                crawler.setStartUri(URI.create(args[++i]));
+                startUri = URI.create(args[++i]);
             } else if ("-reportDir".equals(args[i])) {
                 path = new File(args[++i]);
             } else if ("-max".equals(args[i])) {
@@ -63,20 +63,27 @@ public class App {
             }
 
         }
+        if (startUri == null)
+            throw new IllegalArgumentException("startUri is not set");
+        int t = startUri.toASCIIString().indexOf("ContentServer");
+        crawler.setHost(startUri.toASCIIString().substring(0, t));
+        crawler.setStartUri(new URI(null, null, null, -1,
+                startUri.getRawPath(), startUri.getRawQuery(), startUri
+                        .getFragment()));
 
         if (path == null) {
             path = App.getOutputDir();
         }
-        
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd-HHmm");
-        path = new File(path,df.format(new Date()));
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd_HHmm");
+        path = new File(path, df.format(new Date()));
         path.mkdirs();
         SSUriHelper helper = null;
 
         if (factory != null) {
             UriHelperFactory f = (UriHelperFactory) (Class.forName(factory)
                     .newInstance());
-            helper=f.create(crawler.getStartUri().getPath());
+            helper = f.create(crawler.getStartUri().getPath());
         } else {
             helper = new SSUriHelper(crawler.getStartUri().getPath());
         }
@@ -91,8 +98,8 @@ public class App {
     }
 
     private static File getOutputDir() {
-        final File outputDir = new File(TempDir.getTempDir(App.class), Long
-                .toString(System.currentTimeMillis()));
+        
+        final File outputDir = new File("./reports");//TempDir.getTempDir(App.class);
         outputDir.mkdirs();
         return outputDir;
     }
@@ -134,8 +141,9 @@ public class App {
                 "pagelet-only.txt")));
         reporters.add(new NotCachedReporter(new FileReport(outputDir,
                 "not-cached.txt")));
-        reporters.add(new DefaultArgumentsAsPageCriteriaReporter(new FileReport(outputDir,
-        "defaultArgumentsAsPageCriteriaReporter.txt")));
+        reporters.add(new DefaultArgumentsAsPageCriteriaReporter(
+                new FileReport(outputDir,
+                        "defaultArgumentsAsPageCriteriaReporter.txt")));
         return reporters;
     }
 

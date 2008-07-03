@@ -11,7 +11,7 @@
     <artifactId>ss-crawler</artifactId>
     <packaging>jar</packaging>
     <name>Crawler emulating Satellite Server</name>
-    <url>http://www.nl.fatwire.com/ss-crawler/</url>
+    <url>http://www.nl.fatwire.com/dta/ss-crawler/</url>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -32,12 +32,6 @@
             <groupId>commons-math</groupId>
             <artifactId>commons-math</artifactId>
             <version>1.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-            <version>2.5.3</version>
         </dependency>
     </dependencies>
     <build>
