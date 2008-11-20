@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,7 +12,7 @@ import com.fatwire.cs.monitor.event.FetchEvent;
 import com.fatwire.cs.monitor.event.FetchEventListener;
 import com.fatwire.cs.profiling.servlet.filter.HttpFilter;
 
-public class EventFilter extends HttpFilter implements Filter{
+public class EventFilter extends HttpFilter implements Filter {
 
     private FetchEventListener listener;
 
@@ -35,16 +34,6 @@ public class EventFilter extends HttpFilter implements Filter{
      */
     public void setListener(final FetchEventListener listener) {
         this.listener = listener;
-    }
-
-    public void destroy() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // TODO Auto-generated method stub
-        
     }
 
 }

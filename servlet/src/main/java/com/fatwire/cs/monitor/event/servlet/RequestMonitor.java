@@ -3,23 +3,23 @@ package com.fatwire.cs.monitor.event.servlet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.fatwire.cs.monitor.Statistics;
+import com.fatwire.cs.monitor.commons.math.SummaryStatisticsAdapter;
 import com.fatwire.cs.monitor.event.FetchEvent;
 import com.fatwire.cs.monitor.event.FetchEventListener;
-import com.fatwire.cs.monitor.simple.SimpleStatistics;
 
 public class RequestMonitor implements FetchEventListener {
 
-    private Map<String, SimpleStatistics> statistics = new TreeMap<String, SimpleStatistics>();
+    private Map<String, SummaryStatisticsAdapter> statistics = new ConcurrentHashMap<String, SummaryStatisticsAdapter>();
 
     private String[] paramsToListenFor = new String[0];
 
     public void fetchPerformed(final FetchEvent event) {
-        SimpleStatistics s = null;
+        SummaryStatisticsAdapter s = null;
         if (event.getSource() instanceof HttpServletRequest) {
             final HttpServletRequest request = (HttpServletRequest) event
                     .getSource();
@@ -52,13 +52,13 @@ public class RequestMonitor implements FetchEventListener {
 
     }
 
-    SimpleStatistics getInternal(final String name) {
+    SummaryStatisticsAdapter getInternal(final String name) {
         if (name == null) {
             return null;
         }
-        SimpleStatistics s = statistics.get(name);
+        SummaryStatisticsAdapter s = statistics.get(name);
         if (s == null) {
-            s = new SimpleStatistics(name);
+            s = new SummaryStatisticsAdapter(name);
             statistics.put(name, s);
         }
         return s;
