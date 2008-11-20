@@ -28,7 +28,7 @@ public class StopWatchFilter extends HttpFilter implements Filter {
 
         final String swName = getStopWatchName(request);
         //System.out.println(swName.toString());
-        final StopWatch sw = SW.getStopWatch(swName.toString());
+        final StopWatch sw = SW.getStopWatch(swName);
         sw.start();
         try {
             chain.doFilter(request, response);
@@ -38,21 +38,18 @@ public class StopWatchFilter extends HttpFilter implements Filter {
     }
 
     String getStopWatchName(final HttpServletRequest request) {
-        final StringBuffer swName = new StringBuffer("http.");
+        final StringBuffer swName = new StringBuffer("request.");
         swName.append(request.getMethod());
         //swName.append(request.getContextPath());
         swName.append(".").append(request.getRequestURI());
-        //if ("GET".equalsIgnoreCase(request.getMethod())) {
-            for (int i = 0; i < specialParams.length; i++) {
-                final String special = specialParams[i];
-                final String value = request.getParameter(special);
-                if (value != null) {
-                    swName.append(".").append(special).append("=")
-                            .append(value);
-                }
+        for (int i = 0; i < specialParams.length; i++) {
+            final String special = specialParams[i];
+            final String value = request.getParameter(special);
+            if (value != null) {
+                swName.append(".").append(special).append("=").append(value);
             }
+        }
 
-        //}
         return swName.toString();
 
     }
