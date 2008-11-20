@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,10 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.fatwire.cs.profiling.servlet.Util;
 
 public class TimerFilter extends HttpFilter implements Filter {
-    public void destroy() {
-        // TODO Auto-generated method stub
 
-    }
     /**
      * Prints the time it took to process this request.
      * If you don't want this info, shut down the filter by removing it from the web-app.
@@ -32,14 +28,8 @@ public class TimerFilter extends HttpFilter implements Filter {
             chain.doFilter(request, response);
         } finally {
             long end = System.currentTimeMillis();
-            log.info(Long.toString(end - start) + " for "
-                    + url);
+            log.info(Long.toString(end - start) + " for " + url);
         }
-
-    }
-
-    public void init(FilterConfig arg0) throws ServletException {
-        // TODO Auto-generated method stub
 
     }
 
