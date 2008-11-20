@@ -3,7 +3,6 @@ package com.fatwire.cs.profiling.servlet.filter;
 import java.io.IOException;
 import java.security.Principal;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -12,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-public class AccessLogFilter extends HttpFilter implements Filter {
+public class AccessLogFilter extends RunOnceFilter {
 
     private char sep = '\t';
 
@@ -20,7 +19,8 @@ public class AccessLogFilter extends HttpFilter implements Filter {
         //nothing
     }
 
-    public void doFilter(HttpServletRequest request,
+    @Override
+    protected void doFilterOnce(HttpServletRequest request,
             HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         if (log.isInfoEnabled()) {
