@@ -6,11 +6,11 @@ import java.lang.management.ThreadMXBean;
 
 public class ThreadDumper {
 
-    private final ThreadMXBean threadMXBean;
+    protected final ThreadMXBean threadMXBean;
 
-    private static final String INDENT = "    ";
+    private static final char[] INDENT = "    ".toCharArray();
 
-    private static final String NEW_LINE = "\r\n";
+    private static final char[] NEW_LINE = "\r\n".toCharArray();
 
     public ThreadDumper() {
         super();
@@ -21,7 +21,7 @@ public class ThreadDumper {
         ThreadInfo[] threadInfos;
         threadInfos = threadMXBean.getThreadInfo(
                 threadMXBean.getAllThreadIds(), Integer.MAX_VALUE);
-        
+
         for (ThreadInfo threadInfo : threadInfos) {
             printThreadInfo(threadInfo, sb);
         }
@@ -30,10 +30,10 @@ public class ThreadDumper {
 
     protected void printThreadInfo(ThreadInfo ti, final StringBuilder sb) {
         long tid = ti.getThreadId();
-        sb.append("\"" + ti.getThreadName() + "\"" + " Id=" + tid + " in "
-                + ti.getThreadState());
+        sb.append("\"").append(ti.getThreadName()).append("\"").append(" Id=").append(tid).append(" in "
+               ).append(ti.getThreadState());
         if (ti.getLockName() != null) {
-            sb.append(" on lock=" + ti.getLockName());
+            sb.append(" on lock=").append(ti.getLockName());
         }
         if (ti.isSuspended()) {
             sb.append(" (suspended)");
@@ -42,19 +42,20 @@ public class ThreadDumper {
             sb.append(" (running in native)");
         }
         if (threadMXBean.isThreadCpuTimeSupported()) {
-            sb.append(" total cpu time="
-                    + formatNanos(threadMXBean.getThreadCpuTime(tid)));
-            sb.append(" user time="
-                    + formatNanos(threadMXBean.getThreadUserTime(tid)));
+            sb.append(" total cpu time=")
+                    .append( formatNanos(threadMXBean.getThreadCpuTime(tid)));
+            sb.append(" user time=").append(
+                    formatNanos(threadMXBean.getThreadUserTime(tid)));
         }
         if (ti.getLockOwnerName() != null) {
-            sb.append(INDENT + " owned by " + ti.getLockOwnerName() + " Id="
-                    + ti.getLockOwnerId());
+            sb.append(INDENT).append(" owned by ")
+                    .append(ti.getLockOwnerName()).append(" Id=").append(
+                            ti.getLockOwnerId());
 
         }
         sb.append(NEW_LINE);
         for (StackTraceElement ste : ti.getStackTrace()) {
-            sb.append(INDENT + "at " + ste.toString());
+            sb.append(INDENT).append("at ").append(ste.toString());
             sb.append(NEW_LINE);
         }
         sb.append(NEW_LINE);
