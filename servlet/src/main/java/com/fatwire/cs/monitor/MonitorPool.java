@@ -1,7 +1,7 @@
 package com.fatwire.cs.monitor;
 
 
-public interface MonitorPool extends Iterable {
+public interface MonitorPool extends Iterable<Monitor> {
 
 	/**
 	 * get a Stopwatch with a certain name
