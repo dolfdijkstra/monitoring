@@ -61,9 +61,6 @@ public class CacheManager implements CacheManagerMBean {
             ObjectName name = new ObjectName(domainName + ":name=CacheManager");
             server.registerMBean(this, name);
             JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:5555");
-                    //"service:jmx:rmi:///jndi/rmi:///jettymbeanserver");
-                    //
-                    //"service:jmx:rmi:///jndi/rmi://localhost:9991/server");
             cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null,
                     server);
 
@@ -105,7 +102,7 @@ public class CacheManager implements CacheManagerMBean {
          */
         @SuppressWarnings("unchecked")
         private void registerMBeans() {
-            //TODO: degegistring of MBeans when ftTimedHashtable no longer exists
+            //TODO: deregistering of MBeans when ftTimedHashtable no longer exists
             final Set<String> hashNames = ftTimedHashtable.getAllCacheNames();
             for (final String hashName : hashNames) {
                 try {
