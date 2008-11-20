@@ -15,6 +15,7 @@ public class ContextLogger implements ServletContextListener {
     /* (non-Javadoc)
      * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.ServletContextEvent)
      */
+    @SuppressWarnings("unchecked")
     public void contextInitialized(ServletContextEvent event) {
         ServletContext sc = event.getServletContext();
         log.info("ServerInfo: " + sc.getServerInfo());
@@ -22,8 +23,8 @@ public class ContextLogger implements ServletContextListener {
         log.info("MinorVersion: " + sc.getMinorVersion());
         log.info("ServletContextName: " + sc.getServletContextName());
 
-        for (Enumeration e = sc.getInitParameterNames(); e.hasMoreElements();) {
-            String name = (String) e.nextElement();
+        for (Enumeration<String> e = sc.getInitParameterNames(); e.hasMoreElements();) {
+            String name = e.nextElement();
             log.info("Init-Param: " + name + "=" + sc.getInitParameter(name));
 
         }
