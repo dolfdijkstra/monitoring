@@ -20,16 +20,6 @@ public class LoggingFetchEventListener implements FetchEventListener {
                     String.valueOf(event.getEndTime() - event.getStartTime())
                             .toCharArray());
             bld.append(LoggingFetchEventListener.msgPostfix);
-            //final Object s = event.getSource();
-
-            //            if (s instanceof PieceMetaData) {
-            //                final PieceMetaData pmd = (PieceMetaData) s;
-            //                final String key = pmd.getCacheKey();
-            //                if (key != null) {
-            //                    bld.append(key.toCharArray());
-            //                }
-            //            }
-
             log.debug(bld.toString());
         }
 
