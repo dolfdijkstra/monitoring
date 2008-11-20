@@ -24,7 +24,7 @@ import com.fatwire.cs.monitor.Statistics;
 public class ReporterController implements Controller {
 
     /* (non-Javadoc)
-     * @see com.fatwire.cs.monitor.servlet.Controller#process(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.springframework.web.servlet.mvc.Controller#handleRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public ModelAndView handleRequest(final HttpServletRequest request,
             final HttpServletResponse response) throws Exception {
