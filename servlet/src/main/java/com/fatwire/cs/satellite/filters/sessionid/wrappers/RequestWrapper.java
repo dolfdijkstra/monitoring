@@ -39,7 +39,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
                     String value2 = new StringBuffer(100).append("expires=")
                             .append(cookies[i].getMaxAge()).append("&name=")
                             .append(name).append("&value=").append(value)
-                            .append("&path=%2F").toString();
+                            .append("&uriHelper=%2F").toString();
                     ses.setAttribute(name, value2);
                     break;
                 }
