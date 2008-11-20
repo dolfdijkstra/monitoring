@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.Controller;
 
 public class Log4jController implements Controller {
 
+    @SuppressWarnings("unchecked")
     public ModelAndView handleRequest(final HttpServletRequest request,
             final HttpServletResponse response) throws Exception {
         final String logName = request.getParameter("log");
@@ -32,15 +33,15 @@ public class Log4jController implements Controller {
         mav.addObject("loggerRepository", Logger.getRootLogger()
                 .getLoggerRepository());
         final Set<String> loggerNames = new TreeSet<String>();
-        for (final Enumeration enumeration = Logger.getRootLogger()
+        for (final Enumeration<Logger> enumeration = Logger.getRootLogger()
                 .getLoggerRepository().getCurrentLoggers(); enumeration
                 .hasMoreElements();) {
-            final Logger logger = (Logger) enumeration.nextElement();
+            final Logger logger = enumeration.nextElement();
             loggerNames.add(logger.getName());
         }
         final List<Logger> loggers = new LinkedList<Logger>();
-        for (final Iterator itor=loggerNames.iterator();itor.hasNext(); ){
-            loggers.add(Logger.getLogger((String)itor.next()));
+        for (final Iterator<String> itor=loggerNames.iterator();itor.hasNext(); ){
+            loggers.add(Logger.getLogger(itor.next()));
         }
         mav.addObject("loggers", loggers);
         return mav;

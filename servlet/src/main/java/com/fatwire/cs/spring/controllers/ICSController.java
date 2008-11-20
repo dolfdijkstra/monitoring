@@ -37,7 +37,7 @@ public class ICSController implements Controller, ServletContextAware {
             mav.addObject("asset", ics.GetObj("assetName"));
             return mav;
         }
-
+        
     }
 
     public void setServletContext(final ServletContext context) {

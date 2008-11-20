@@ -12,22 +12,22 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import com.fatwire.cs.profiling.jvm.ThreadDumper;
+import com.fatwire.cs.profiling.jvm.LockDumper;
 
-public class ThreadDumpController implements Controller {
+public class JvmLockController implements Controller {
 
     private final Log log = LogFactory.getLog(this.getClass());
 
-    private final ThreadDumper dumper;
+    private final LockDumper dumper;
 
     private final String host;
 
     /**
      * 
      */
-    public ThreadDumpController() {
+    public JvmLockController() {
         super();
-        dumper = new ThreadDumper();
+        dumper = new LockDumper();
         String tmp;
         try {
             tmp = java.net.InetAddress.getLocalHost().getHostName();
@@ -38,14 +38,13 @@ public class ThreadDumpController implements Controller {
         host = tmp;
     }
 
-    /* (non-Javadoc)
-     * @see org.springframework.web.servlet.mvc.Controller#handleRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     public ModelAndView handleRequest(final HttpServletRequest request,
             final HttpServletResponse response) throws Exception {
         final PrintWriter writer = response.getWriter();
-        final String title = "Thread Dump from " + host + " at " + new Date();
-        writer.write("<html><head><title>" + title + "</title><head><body>");
+        final String title = "Lock Dump from " + host + " at " + new Date();
+        writer.write("<html><head><title>");
+        writer.write(title);
+        writer.write("</title><head><body>");
         writer.write("<h1>");
         writer.write(title);
         writer.write("</h1>");
