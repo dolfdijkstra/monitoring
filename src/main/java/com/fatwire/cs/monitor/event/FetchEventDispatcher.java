@@ -10,12 +10,12 @@ public class FetchEventDispatcher implements FetchEventListener {
     private final Set<FetchEventListener> listeners = new CopyOnWriteArraySet<FetchEventListener>();
 
     public static void dispatch(final FetchEvent event) {
-        FetchEventDispatcher.self.fetchPerformed(event);
+        getInstance().fetchPerformed(event);
     }
 
     public void fetchPerformed(final FetchEvent event) {
-        for (final Iterator itor = listeners.iterator(); itor.hasNext();) {
-            ((FetchEventListener) itor.next()).fetchPerformed(event);
+        for (final Iterator<FetchEventListener> itor = listeners.iterator(); itor.hasNext();) {
+            itor.next().fetchPerformed(event);
         }
 
     }
