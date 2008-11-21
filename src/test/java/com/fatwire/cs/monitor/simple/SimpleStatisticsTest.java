@@ -1,7 +1,5 @@
 package com.fatwire.cs.monitor.simple;
 
-import java.util.Random;
-
 import junit.framework.TestCase;
 
 public class SimpleStatisticsTest extends TestCase {
@@ -21,20 +19,9 @@ public class SimpleStatisticsTest extends TestCase {
         s.addValue(40);
         s.addValue(50);
         s.addValue(60);
-        System.out.println(s.getStandardDeviation());
+        assertEquals(15.811388300841896D,s.getStandardDeviation());
 
     }
 
-    public void testGetStandardDeviation2() {
-
-        SimpleStatistics s = new SimpleStatistics("test");
-        Random rnd = new Random();
-        for (int i = 0; i < 2000000; i++) {
-            s.addValue(rnd.nextInt(50000));
-        }
-        System.out.println(s.getAverage());
-        System.out.println(s.getStandardDeviation());
-
-    }
 
 }
