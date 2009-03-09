@@ -1,6 +1,7 @@
 package com.fatwire.cs.profiling.jmx;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Date;
 
 import COM.FutureTense.Util.ftTimedHashtable;
@@ -9,6 +10,8 @@ import com.fatwire.cs.core.cache.RuntimeCacheStats;
 
 public class CacheStats implements CacheStatsMBean {
     final String hashName;
+
+    WeakReference<ftTimedHashtable> hashRef;
 
     /**
      * @param delegate
@@ -76,7 +79,14 @@ public class CacheStats implements CacheStatsMBean {
 
     private RuntimeCacheStats getDelegate() {
         //TODO figure out how long this can be cached.
-        final ftTimedHashtable ftTh = ftTimedHashtable.findHash(hashName);
+        ftTimedHashtable ftTh = (hashRef == null) ? null : hashRef.get();
+        if (ftTh == null) {
+            ftTh = ftTimedHashtable.findHash(hashName);
+            if (ftTh != null) {
+                hashRef = new WeakReference<ftTimedHashtable>(ftTh);
+            }
+        }
+
         if (ftTh == null) {
             return new NullRuntimeCacheStats();
         }
