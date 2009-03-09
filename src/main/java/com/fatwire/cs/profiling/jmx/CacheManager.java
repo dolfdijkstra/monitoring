@@ -58,13 +58,15 @@ public class CacheManager implements CacheManagerMBean {
         if (runnable == null) {
             server = MBeanServerFactory.createMBeanServer(domainName);
             runnable = new CacheManagerRunnable();
-            ObjectName name = new ObjectName(domainName + ":name=CacheManager");
+            ObjectName name = new ObjectName(domainName + ":type=CacheManager");
             server.registerMBean(this, name);
+            /*
             JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:5555");
             cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null,
                     server);
 
             cs.start();
+            */
             final Thread t = new Thread(runnable, "CacheManager JMX Thread");
             t.setDaemon(true);
             t.start();
@@ -109,6 +111,7 @@ public class CacheManager implements CacheManagerMBean {
                     
                     final ObjectName name = new ObjectName(domainName
                             + ":type=runtimecachestats,name=" + ObjectName.quote(hashName));
+                    log.debug(name);
                     if (!server.isRegistered(name)) {
                         server.registerMBean(new CacheStats(
                                 hashName), name);
