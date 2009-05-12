@@ -1,18 +1,72 @@
 package com.fatwire.cs.profiling.servlet;
 
+import java.util.Date;
+
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * 
+ * <p>To deploy this listener you need to:<br/>
+ * <br/>
+ * Add the compiled class to WEB-INF/classes, and add the following in web.xml to activate our SessionListener.<br/>
+ *
+ * &lt;listener&gt;<br/>
+ *    &lt;listener-class&gt;com.fatwire.cs.profiling.servlet.SessionLogger&lt;/listener-class&gt;<br/>
+ * &lt;/listener&gt;<br/>
+ *<br/>
+ *<br/>
+ * To see any messages in the log file the 'com.fatwire.cs.profiling.servlet.SessionLogger' loggger needs to be set to DEBUG level.<br/>
+ * <br/>
+ * 
+ */
+
 public class SessionLogger implements HttpSessionAttributeListener,
-        HttpSessionBindingListener {
+        HttpSessionListener {
     private final Log log = LogFactory.getLog(this.getClass());
 
+    private final HttpSessionActivationListener distributionListener = new MyHttpSessionActivationListener();
+    
+    private class MyHttpSessionActivationListener implements HttpSessionActivationListener, java.io.Serializable {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
+        public void sessionDidActivate(final HttpSessionEvent event) {
+            if (log.isDebugEnabled()) {
+                log.debug(buildDebugInfo(event.getSession() , "sessionDidActivate"));
+            }
+
+        }
+
+        public void sessionWillPassivate(final HttpSessionEvent event) {
+            if (log.isDebugEnabled()) {
+                log.debug(buildDebugInfo(event.getSession() , "sessionWillPassivate"));
+            }
+
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return "MyHttpSessionActivationListener";
+        }
+
+    };
+
     public SessionLogger() {
-        log.debug("SessionLogger");
+        log.debug("SessionLogger started");
     }
 
     /*
@@ -22,11 +76,9 @@ public class SessionLogger implements HttpSessionAttributeListener,
      */
     public void attributeAdded(final HttpSessionBindingEvent event) {
         if (log.isDebugEnabled()) {
-            log
-                    .debug("sessionAttributeAdded:"
-                            + event.getSession().getId() + ":"
-                            + event.getName() + "="
-                            + event.getValue().toString());
+            log.debug("sessionAttributeAdded: '" + event.getSession().getId()
+                    + "' " + event.getName() + "="
+                    + String.valueOf(event.getValue()));
         }
     }
 
@@ -37,8 +89,8 @@ public class SessionLogger implements HttpSessionAttributeListener,
      */
     public void attributeRemoved(final HttpSessionBindingEvent event) {
         if (log.isDebugEnabled()) {
-            log.debug("sessionAttributeRemoved:" + event.getSession().getId()
-                    + ":" + event.getName());
+            log.debug("sessionAttributeRemoved: '" + event.getSession().getId()
+                    + "' " + event.getName());
         }
     }
 
@@ -49,35 +101,38 @@ public class SessionLogger implements HttpSessionAttributeListener,
      */
     public void attributeReplaced(final HttpSessionBindingEvent event) {
         if (log.isDebugEnabled()) {
-            log
-                    .debug("sessionAttributeReplaced:"
-                            + event.getSession().getId() + ":"
-                            + event.getName() + "="
-                            + event.getValue().toString());
+            log.debug("sessionAttributeReplaced '" + event.getSession().getId()
+                    + "' " + event.getName() + "="
+                    + String.valueOf(event.getValue()));
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.servlet.http.HttpSessionBindingListener#valueBound(javax.servlet.http.HttpSessionBindingEvent)
-     */
-    public void valueBound(final HttpSessionBindingEvent event) {
+    public void sessionCreated(final HttpSessionEvent event) {
         if (log.isDebugEnabled()) {
-            log.debug("sessionValueBound:" + event.getSession().getId() + ":"
-                    + event.getName() + "=" + event.getValue().toString());
+            log.debug(buildDebugInfo(event.getSession() , "sessionCreated"));
+            event.getSession().setAttribute("distributionListener", distributionListener);
         }
+
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.servlet.http.HttpSessionBindingListener#valueUnbound(javax.servlet.http.HttpSessionBindingEvent)
-     */
-    public void valueUnbound(final HttpSessionBindingEvent event) {
+    public void sessionDestroyed(final HttpSessionEvent event) {
         if (log.isDebugEnabled()) {
-            log.debug("sessionValueUnbound:" + event.getSession().getId() + ":"
-                    + event.getName());
+            log.debug(buildDebugInfo(event.getSession() , "sessionDestroyed"));
         }
+
+    }
+
+    static String buildDebugInfo(HttpSession session, String method) {
+        if (session == null || method == null)
+            return "";
+        StringBuilder b =  new StringBuilder(method);
+        b.append(": '");
+        b.append(session.getId()).append("', lastAccessed: ").append(
+                new Date(session.getLastAccessedTime()) + ", created:").append(
+                new Date(session.getCreationTime())).append(
+                ", maxInactiveInterval: ").append(
+                session.getMaxInactiveInterval());
+        return b.toString();
+
     }
 }
