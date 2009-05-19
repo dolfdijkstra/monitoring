@@ -1,17 +1,14 @@
 package com.fatwire.cs.profiling.jmx;
 
+import java.lang.management.ManagementFactory;
 import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
-import javax.management.remote.JMXServiceURL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,26 +23,14 @@ public class CacheManager implements CacheManagerMBean {
 
     private MBeanServer server;
 
-    private JMXConnectorServer cs;
-
     public void setDomainName(final String domainName) {
         this.domainName = domainName;
 
     }
 
     public void shutdown() throws Exception {
-        try {
-
-            if (cs != null) {
-                cs.stop();
-            }
-        } finally {
-            if (runnable != null) {
-                runnable.shutDown();
-            } else {
-                throw new java.lang.IllegalStateException(
-                        "Runnable is not running");
-            }
+        if (runnable != null) {
+            runnable.shutDown();
         }
 
     }
@@ -56,24 +41,13 @@ public class CacheManager implements CacheManagerMBean {
 
         }
         if (runnable == null) {
-            server = MBeanServerFactory.createMBeanServer(domainName);
+            server = ManagementFactory.getPlatformMBeanServer();
             runnable = new CacheManagerRunnable();
             ObjectName name = new ObjectName(domainName + ":type=CacheManager");
             server.registerMBean(this, name);
-            /*
-            JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:5555");
-            cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null,
-                    server);
-
-            cs.start();
-            */
             final Thread t = new Thread(runnable, "CacheManager JMX Thread");
             t.setDaemon(true);
             t.start();
-
-        } else {
-            throw new java.lang.IllegalStateException(
-                    "Runnable is already running");
         }
 
     }
@@ -108,13 +82,13 @@ public class CacheManager implements CacheManagerMBean {
             final Set<String> hashNames = ftTimedHashtable.getAllCacheNames();
             for (final String hashName : hashNames) {
                 try {
-                    
+
                     final ObjectName name = new ObjectName(domainName
-                            + ":type=runtimecachestats,name=" + ObjectName.quote(hashName));
+                            + ":type=runtimecachestats,name="
+                            + ObjectName.quote(hashName));
                     log.debug(name);
                     if (!server.isRegistered(name)) {
-                        server.registerMBean(new CacheStats(
-                                hashName), name);
+                        server.registerMBean(new CacheStats(hashName), name);
 
                     }
 

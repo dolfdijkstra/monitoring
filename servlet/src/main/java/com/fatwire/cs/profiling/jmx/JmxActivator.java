@@ -23,7 +23,7 @@ public class JmxActivator implements ServletContextListener {
     public void contextInitialized(final ServletContextEvent event) {
         log.info("JmxActivator.contextInitialized");
         CacheManager cacheManager1 = new CacheManager();
-        cacheManager1.setDomainName("com.fatwire.jmx.cs");
+        cacheManager1.setDomainName("com.fatwire.cs");
         cacheManager = cacheManager1;
         try {
             cacheManager.start();

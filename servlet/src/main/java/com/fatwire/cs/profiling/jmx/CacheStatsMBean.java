@@ -53,4 +53,11 @@ public interface CacheStatsMBean {
      */
     public boolean hasINotifyObjects() throws IOException;
 
+    /**
+     * The current size of the cache
+     * @return
+     * @throws IOException
+     */
+    public long getSize() throws IOException;
+    
 }

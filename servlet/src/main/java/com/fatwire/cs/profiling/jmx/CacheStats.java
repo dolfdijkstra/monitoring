@@ -9,9 +9,9 @@ import COM.FutureTense.Util.ftTimedHashtable;
 import com.fatwire.cs.core.cache.RuntimeCacheStats;
 
 public class CacheStats implements CacheStatsMBean {
-    final String hashName;
+    private final String hashName;
 
-    WeakReference<ftTimedHashtable> hashRef;
+    private WeakReference<ftTimedHashtable> hashRef;
 
     /**
      * @param delegate
@@ -40,6 +40,14 @@ public class CacheStats implements CacheStatsMBean {
      */
     public long getHits() throws IOException {
         return getDelegate().getHits();
+    }
+
+    public long getSize() throws IOException {
+        getDelegate();
+        ftTimedHashtable t = hashRef.get();
+        if (t != null)
+            return t.size();
+        return 0;
     }
 
     /* (non-Javadoc)
