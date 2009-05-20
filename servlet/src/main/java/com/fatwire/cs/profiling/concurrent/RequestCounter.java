@@ -63,7 +63,7 @@ public class RequestCounter implements
                 requestInfoComparator);
         RequestInfo[] r;
         synchronized (threadMap) {
-            r = threadMap.values().toArray(new RequestInfo[threadMap.size()]);
+            r = threadMap.values().toArray(new RequestInfo[0]);
         }
         for (RequestInfo info : r) {
             if (info.isAlive()) {//filter out inactive threads
@@ -93,13 +93,19 @@ public class RequestCounter implements
         counter.incrementAndGet();
 
     }
-
-    public void end(final HttpServletRequest request) {
+/**
+ * signal end of the request
+ * 
+ * @return the execution time for this requets in nano seconds
+ */
+    public long end(final HttpServletRequest request) {
         final RequestInfo current = threadLocal.get();
         if (current.isRunning()) {
             current.end(request);
             concurrencyCounter.decrementAndGet();
+            return current.getExecutionTimeForLastRequest();
         }
+        return -1;
 
     }
 

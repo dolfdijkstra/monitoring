@@ -17,15 +17,21 @@ import COM.FutureTense.Util.ftTimedHashtable;
 
 public class CacheManager implements CacheManagerMBean {
 
-    private String domainName;
+    //private String domainName;
+
+    private ObjectName managerName;
 
     private CacheManagerRunnable runnable;
 
     private MBeanServer server;
 
-    public void setDomainName(final String domainName) {
-        this.domainName = domainName;
+    private int count;
 
+    private Object signal = new Object();
+
+
+    public int getNumberOfCaches() {
+        return count;
     }
 
     public void shutdown() throws Exception {
@@ -36,15 +42,15 @@ public class CacheManager implements CacheManagerMBean {
     }
 
     public void start() throws Exception {
-        if (domainName == null) {
-            throw new java.lang.IllegalStateException("domainName is not set");
+        if (managerName == null) {
+            throw new java.lang.IllegalStateException("managerName is not set");
 
         }
         if (runnable == null) {
             server = ManagementFactory.getPlatformMBeanServer();
             runnable = new CacheManagerRunnable();
-            ObjectName name = new ObjectName(domainName + ":type=CacheManager");
-            server.registerMBean(this, name);
+            //managerName = new ObjectName(domainName + ":type=CacheManager");
+            server.registerMBean(this, managerName);
             final Thread t = new Thread(runnable, "CacheManager JMX Thread");
             t.setDaemon(true);
             t.start();
@@ -63,7 +69,9 @@ public class CacheManager implements CacheManagerMBean {
 
             while (!stop) {
                 try {
-                    Thread.sleep(waitTime);
+                    synchronized(signal){
+                        signal.wait(waitTime);
+                    }
                     registerMBeans();
                 } catch (final InterruptedException e) {
                     e.printStackTrace();
@@ -83,10 +91,10 @@ public class CacheManager implements CacheManagerMBean {
             for (final String hashName : hashNames) {
                 try {
 
-                    final ObjectName name = new ObjectName(domainName
-                            + ":type=runtimecachestats,name="
-                            + ObjectName.quote(hashName));
-                    log.debug(name);
+                    final ObjectName name = new ObjectName(managerName
+                            .getCanonicalName()
+                            + ",name=" + ObjectName.quote(hashName));
+                    //log.debug(name);
                     if (!server.isRegistered(name)) {
                         server.registerMBean(new CacheStats(hashName), name);
 
@@ -107,8 +115,26 @@ public class CacheManager implements CacheManagerMBean {
 
         synchronized void shutDown() {
             stop = true;
+            synchronized(signal){
+                signal.notifyAll();
+            }
 
         }
 
     }
+
+    /**
+     * @return the managerName
+     */
+    public ObjectName getManagerName() {
+        return managerName;
+    }
+
+    /**
+     * @param managerName the managerName to set
+     */
+    public void setManagerName(ObjectName managerName) {
+        this.managerName = managerName;
+    }
+
 }

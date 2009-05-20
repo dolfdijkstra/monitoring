@@ -6,7 +6,7 @@ public interface ConcurrencyCounter<T,E> {
 
     void start(T t);
     
-    void end(T t);
+    long end(T t);
 
     long getTotalCount();
     
