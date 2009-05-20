@@ -71,6 +71,7 @@ public class ResponseTimeRequestListener implements ServletRequestListener,
     }
 
     String extractName(HttpServletRequest request) {
+        
         StringBuilder b = new StringBuilder(",path=")
                 .append(request.getRequestURI());
         if (request.getQueryString() != null) {
@@ -103,7 +104,7 @@ public class ResponseTimeRequestListener implements ServletRequestListener,
         try {
             MBeanServer s = ManagementFactory.getPlatformMBeanServer();
             Set<ObjectName> names = s.queryNames(ObjectName.getInstance(objName
-                    + "*"), null);
+                    + ",*"), null);
             if (names != null) {
                 for (ObjectName o : names) {
                     s.unregisterMBean(o);
