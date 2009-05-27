@@ -148,7 +148,7 @@ public class MeasurementTest extends TestCase {
             stopTime = threadBean.getCurrentThreadCpuTime();
             count++;
         }
-        System.out.println("Resolution: " + (stopTime - startTime) + "ns in "
+        System.out.println("Resolution via CpuTime: " + (stopTime - startTime) + "ns in "
                 + count + " iterations.");
 
     }
@@ -162,7 +162,7 @@ public class MeasurementTest extends TestCase {
             stopTime = threadBean.getCurrentThreadUserTime();
             count++;
         }
-        System.out.println("Resolution: " + (stopTime - startTime) + "ns in "
+        System.out.println("Resolution via UserTime: " + (stopTime - startTime) + "ns in "
                 + count + " iterations.");
 
     }
