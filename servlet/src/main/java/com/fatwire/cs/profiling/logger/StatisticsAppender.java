@@ -87,7 +87,7 @@ class StatisticsAppender extends AppenderSkeleton implements TimeDebugParser.Par
             ObjectName name = null;
             try {
                 name = new ObjectName(
-                        "com.fatwire.cs:type=StatFromLogger,group="
+                        "com.fatwire.cs:type=StatFromTimeDebug,group="
                                 + type
                                 + (subType != null ? ",subType=" + subType : ""));
             } catch (MalformedObjectNameException e) {
