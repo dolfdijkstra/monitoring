@@ -62,7 +62,7 @@ public class Log4JAppenderLifeCycleManager implements LifeCycleManager {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         try {
             Set<ObjectName> names = server.queryNames(new ObjectName(
-                    "com.fatwire.cs:StatFromLogger,*"), null);
+                    "com.fatwire.cs:type=StatFromTimeDebug,*"), null);
             for (ObjectName name : names) {
                 try {
                     server.unregisterMBean(name);
