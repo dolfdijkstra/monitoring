@@ -53,17 +53,23 @@ public class CacheStats implements CacheStatsMBean {
     /* (non-Javadoc)
      * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getLastFlushedDate()
      */
-    public Date getLastFlushedDate() throws IOException {
-        return getDelegate().getLastFlushedDate();
+    public long getLastFlushedElapsed() throws IOException {
+        return getElapsed(getDelegate().getLastFlushedDate());
     }
 
     /* (non-Javadoc)
      * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getLastPrunedDate()
      */
-    public Date getLastPrunedDate() throws IOException {
-        return getDelegate().getLastPrunedDate();
+    public long getLastPrunedElapsed() throws IOException {
+        return getElapsed(getDelegate().getLastPrunedDate());
     }
 
+    private long getElapsed(Date then){
+        return then !=null ? System.currentTimeMillis() - then.getTime(): 0;
+            
+        
+    }
+    
     /* (non-Javadoc)
      * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getMisses()
      */

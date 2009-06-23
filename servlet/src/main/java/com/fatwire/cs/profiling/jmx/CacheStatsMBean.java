@@ -27,13 +27,13 @@ public interface CacheStatsMBean {
      * @return
      * @see com.fatwire.cs.core.cache.RuntimeCacheStats#getLastFlushedDate()
      */
-    public Date getLastFlushedDate() throws IOException;
+    public long getLastFlushedElapsed() throws IOException;
 
     /**
      * @return
      * @see com.fatwire.cs.core.cache.RuntimeCacheStats#getLastPrunedDate()
      */
-    public Date getLastPrunedDate() throws IOException;
+    public long getLastPrunedElapsed() throws IOException;
 
     /**
      * @return
