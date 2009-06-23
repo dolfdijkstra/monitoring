@@ -17,21 +17,16 @@ import COM.FutureTense.Util.ftTimedHashtable;
 
 public class CacheManager implements CacheManagerMBean {
 
-    //private String domainName;
-
     private ObjectName managerName;
 
     private CacheManagerRunnable runnable;
 
     private MBeanServer server;
 
-    private int count;
-
     private Object signal = new Object();
 
-
     public int getNumberOfCaches() {
-        return count;
+        return ftTimedHashtable.getAllCacheNames().size();
     }
 
     public void shutdown() throws Exception {
@@ -49,7 +44,6 @@ public class CacheManager implements CacheManagerMBean {
         if (runnable == null) {
             server = ManagementFactory.getPlatformMBeanServer();
             runnable = new CacheManagerRunnable();
-            //managerName = new ObjectName(domainName + ":type=CacheManager");
             server.registerMBean(this, managerName);
             final Thread t = new Thread(runnable, "CacheManager JMX Thread");
             t.setDaemon(true);
@@ -69,7 +63,7 @@ public class CacheManager implements CacheManagerMBean {
 
             while (!stop) {
                 try {
-                    synchronized(signal){
+                    synchronized (signal) {
                         signal.wait(waitTime);
                     }
                     registerMBeans();
@@ -92,8 +86,11 @@ public class CacheManager implements CacheManagerMBean {
                 try {
 
                     final ObjectName name = new ObjectName(managerName
-                            .getCanonicalName()
-                            + ",name=" + ObjectName.quote(hashName));
+                            .getDomain()
+                            + ":"
+                            + "type=Cache"
+                            + ",name="
+                            + ObjectName.quote(hashName));
                     //log.debug(name);
                     if (!server.isRegistered(name)) {
                         server.registerMBean(new CacheStats(hashName), name);
@@ -115,7 +112,7 @@ public class CacheManager implements CacheManagerMBean {
 
         synchronized void shutDown() {
             stop = true;
-            synchronized(signal){
+            synchronized (signal) {
                 signal.notifyAll();
             }
 
