@@ -1,5 +1,8 @@
 package com.fatwire.cs.profiling.jmx;
 
+import java.lang.management.ManagementFactory;
+
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -15,18 +18,33 @@ public class JmxActivator implements ServletContextListener {
     public void contextDestroyed(final ServletContextEvent event) {
         try {
             cacheManager.shutdown();
+
         } catch (final Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        try {
+            UnregisterMBeansCommand
+                    .unregister("com.fatwire.cs:type=CacheManager");
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
+        }
+        try {
+            UnregisterMBeansCommand.unregister("com.fatwire.cs:type=Cache,*");
+        } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }
 
     }
 
     public void contextInitialized(final ServletContextEvent event) {
-        log.info("contextInitialized");
+        log.debug("contextInitialized");
         cacheManager = new CacheManager();
         try {
-            cacheManager.setManagerName( new ObjectName("com.fatwire.cs:type=CacheManager"));
             cacheManager.start();
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            server.registerMBean(cacheManager, new ObjectName(
+                    "com.fatwire.cs:type=CacheManager"));
+
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
         }

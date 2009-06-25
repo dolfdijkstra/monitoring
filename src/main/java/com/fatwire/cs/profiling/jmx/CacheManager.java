@@ -17,8 +17,6 @@ import COM.FutureTense.Util.ftTimedHashtable;
 
 public class CacheManager implements CacheManagerMBean {
 
-    private ObjectName managerName;
-
     private CacheManagerRunnable runnable;
 
     private MBeanServer server;
@@ -32,19 +30,15 @@ public class CacheManager implements CacheManagerMBean {
     public void shutdown() throws Exception {
         if (runnable != null) {
             runnable.shutDown();
+            server=null;
         }
 
     }
 
     public void start() throws Exception {
-        if (managerName == null) {
-            throw new java.lang.IllegalStateException("managerName is not set");
-
-        }
         if (runnable == null) {
             server = ManagementFactory.getPlatformMBeanServer();
             runnable = new CacheManagerRunnable();
-            server.registerMBean(this, managerName);
             final Thread t = new Thread(runnable, "CacheManager JMX Thread");
             t.setDaemon(true);
             t.start();
@@ -85,11 +79,8 @@ public class CacheManager implements CacheManagerMBean {
             for (final String hashName : hashNames) {
                 try {
 
-                    final ObjectName name = new ObjectName(managerName
-                            .getDomain()
-                            + ":"
-                            + "type=Cache"
-                            + ",name="
+                    final ObjectName name = new ObjectName(
+                             "com.fatwire.cs:type=Cache,name="
                             + ObjectName.quote(hashName));
                     //log.debug(name);
                     if (!server.isRegistered(name)) {
@@ -120,18 +111,5 @@ public class CacheManager implements CacheManagerMBean {
 
     }
 
-    /**
-     * @return the managerName
-     */
-    public ObjectName getManagerName() {
-        return managerName;
-    }
-
-    /**
-     * @param managerName the managerName to set
-     */
-    public void setManagerName(ObjectName managerName) {
-        this.managerName = managerName;
-    }
 
 }

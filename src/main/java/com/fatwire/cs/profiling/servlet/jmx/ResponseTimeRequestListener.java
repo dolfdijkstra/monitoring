@@ -1,15 +1,11 @@
 package com.fatwire.cs.profiling.servlet.jmx;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -19,10 +15,14 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 
+import com.fatwire.cs.profiling.jmx.UnregisterMBeansCommand;
+
 public class ResponseTimeRequestListener implements ServletRequestListener,
         ServletContextListener {
 
-    private ObjectName objName;
+    private static final String MBEAN_NAME = "com.fatwire.cs:type=ResponseTimeStatistic";
+
+    private NameBuilder nameBuilder = new NameBuilder();
 
     private ResponseTimeStatistic stat = new ResponseTimeStatistic();
 
@@ -38,7 +38,8 @@ public class ResponseTimeRequestListener implements ServletRequestListener,
 
     };
 
-    private Map<String, ResponseTimeStatistic> names = new ConcurrentHashMap<String, ResponseTimeStatistic>(800,0.75f,400);
+    private Map<String, ResponseTimeStatistic> names = new ConcurrentHashMap<String, ResponseTimeStatistic>(
+            800, 0.75f, 400);
 
     public void requestDestroyed(ServletRequestEvent event) {
         if (event.getServletRequest() instanceof HttpServletRequest) {
@@ -48,7 +49,7 @@ public class ResponseTimeRequestListener implements ServletRequestListener,
             m.stop();
 
             stat.signal(request, m);
-            String name = extractName(request);
+            String name = nameBuilder.extractName(request);
             ResponseTimeStatistic x = names.get(name);
             if (x == null) {
                 x = new ResponseTimeStatistic();
@@ -56,7 +57,7 @@ public class ResponseTimeRequestListener implements ServletRequestListener,
                 names.put(name, x);
                 try {
                     ManagementFactory.getPlatformMBeanServer().registerMBean(x,
-                            ObjectName.getInstance(this.objName + name));
+                            ObjectName.getInstance(MBEAN_NAME + name));
                 } catch (InstanceAlreadyExistsException e) {
                     event.getServletContext().log(e.getMessage(), e);
                 } catch (MBeanRegistrationException e) {
@@ -64,7 +65,8 @@ public class ResponseTimeRequestListener implements ServletRequestListener,
                 } catch (NotCompliantMBeanException e) {
                     event.getServletContext().log(e.getMessage(), e);
                 } catch (MalformedObjectNameException e) {
-                    event.getServletContext().log(e.getMessage(), e);
+                    event.getServletContext().log(
+                            e.getMessage() + " for " + MBEAN_NAME + name, e);
                 } catch (NullPointerException e) {
                     event.getServletContext().log(e.getMessage(), e);
                 }
@@ -75,54 +77,17 @@ public class ResponseTimeRequestListener implements ServletRequestListener,
 
     }
 
-    String extractName(HttpServletRequest request) {
-
-        StringBuilder b = new StringBuilder(",path=").append(request
-                .getRequestURI());
-        if (request.getQueryString() != null) {
-            for (String part : request.getQueryString().split("&")) {
-                if (part.startsWith("pagename=")) {
-                    b.append(',');
-                    try {
-                        b.append(java.net.URLDecoder.decode(part, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        b.append(part);
-                    }
-                } else if (part.startsWith("blobtable=")) {
-                    b.append(',').append(part);
-                }
-            }
-
-        }
-        return b.toString();
-    }
-
     public void requestInitialized(ServletRequestEvent event) {
         if (event.getServletRequest() instanceof HttpServletRequest)
             time.get().start();
 
     }
 
-    @SuppressWarnings("unchecked")
     public void contextDestroyed(ServletContextEvent sce) {
         time = null;
         try {
-            MBeanServer s = ManagementFactory.getPlatformMBeanServer();
-            Set<ObjectName> names = s.queryNames(ObjectName.getInstance(objName
-                    + ",*"), null);
-            if (names != null) {
-                for (ObjectName o : names) {
-                    s.unregisterMBean(o);
-                }
-            }
-
-        } catch (InstanceNotFoundException e) {
-            sce.getServletContext().log(e.getMessage(), e);
-        } catch (MBeanRegistrationException e) {
-            sce.getServletContext().log(e.getMessage(), e);
-        } catch (MalformedObjectNameException e) {
-            sce.getServletContext().log(e.getMessage(), e);
-        } catch (NullPointerException e) {
+            UnregisterMBeansCommand.unregister(MBEAN_NAME + ",*");
+        } catch (Exception e) {
             sce.getServletContext().log(e.getMessage(), e);
         }
 
@@ -133,10 +98,9 @@ public class ResponseTimeRequestListener implements ServletRequestListener,
                 "contextInitialized "
                         + sce.getServletContext().getServletContextName());
         try {
-            objName = new ObjectName(
-                    "com.fatwire.cs:type=ResponseTimeStatistic");
+
             ManagementFactory.getPlatformMBeanServer().registerMBean(stat,
-                    objName);
+                    ObjectName.getInstance(MBEAN_NAME));
         } catch (InstanceAlreadyExistsException e) {
             sce.getServletContext().log(e.getMessage(), e);
         } catch (MBeanRegistrationException e) {
