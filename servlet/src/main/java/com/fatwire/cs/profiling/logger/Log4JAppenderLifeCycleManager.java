@@ -11,6 +11,9 @@ import javax.management.ObjectName;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.helpers.LogLog;
+
+import com.fatwire.cs.profiling.jmx.UnregisterMBeansCommand;
 
 public class Log4JAppenderLifeCycleManager implements LifeCycleManager {
 
@@ -57,25 +60,14 @@ public class Log4JAppenderLifeCycleManager implements LifeCycleManager {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void removeMBeans() {
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         try {
-            Set<ObjectName> names = server.queryNames(new ObjectName(
-                    "com.fatwire.cs:type=StatFromTimeDebug,*"), null);
-            for (ObjectName name : names) {
-                try {
-                    server.unregisterMBean(name);
-                } catch (InstanceNotFoundException e) {
-                    log.warn(e);
-                } catch (MBeanRegistrationException e) {
-                    log.warn(e);
-                }
-            }
+            UnregisterMBeansCommand
+                    .unregister("com.fatwire.cs:type=StatFromTimeDebug,*");
         } catch (MalformedObjectNameException e) {
-            log.error(e);
+            LogLog.error(e.getMessage());
         } catch (NullPointerException e) {
-            log.error(e);
+            LogLog.error(e.getMessage());
         }
     }
 

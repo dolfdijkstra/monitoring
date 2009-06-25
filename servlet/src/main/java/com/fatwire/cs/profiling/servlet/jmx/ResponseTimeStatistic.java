@@ -64,7 +64,7 @@ public class ResponseTimeStatistic implements ResponseTimeStatisticMBean {
 
         total = total.add(BigDecimal.valueOf(t));
         minTime = Math.min(minTime, t);
-        maxTime = Math.min(maxTime, t);
+        maxTime = Math.max(maxTime, t);
 
     }
 

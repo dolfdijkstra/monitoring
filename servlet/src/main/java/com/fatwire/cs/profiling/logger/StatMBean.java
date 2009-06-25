@@ -1,6 +1,6 @@
 package com.fatwire.cs.profiling.logger;
 
-interface StatMBean {
+public interface StatMBean {
 
     public String getType();
 

@@ -33,14 +33,6 @@ public class TimeDebugListener implements ServletContextListener {
         try {
             return Log4JLogger.class.isInstance(LogFactory
                     .getLog(COM.FutureTense.Util.ftMessage.TIME_DEBUG));
-            /*
-            Class<?> clazz = Class.forName("org.apache.commons.logging.impl.Log4JLogger");
-            Log log = LogFactory
-                    .getLog(COM.FutureTense.Util.ftMessage.TIME_DEBUG);
-            System.out.println(log.getClass());
-            return clazz.isInstance(log);
-            */
-
         } catch (Throwable e) {
             return false;
         }

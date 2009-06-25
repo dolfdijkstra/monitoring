@@ -64,12 +64,18 @@ public class CacheStats implements CacheStatsMBean {
         return getElapsed(getDelegate().getLastPrunedDate());
     }
 
-    private long getElapsed(Date then){
-        return then !=null ? System.currentTimeMillis() - then.getTime(): 0;
-            
-        
+    /**
+     * 
+     * 
+     * @param then
+     * @return the time between then and now in seconds
+     */
+    private long getElapsed(Date then) {
+        return then != null ? (System.currentTimeMillis() - then.getTime()) / 1000
+                : 0;
+
     }
-    
+
     /* (non-Javadoc)
      * @see com.fatwire.cs.profiling.jmx.RuntimeCacheStatsMBean#getMisses()
      */
