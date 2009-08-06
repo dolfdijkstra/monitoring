@@ -12,11 +12,10 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
-import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
 
-class StatisticsAppender extends AppenderSkeleton implements TimeDebugParser.ParserCallback {
+class StatisticsAppender extends BaseAppender implements TimeDebugParser.ParserCallback {
     static final String TIME_DEBUG = "com.fatwire.logging.cs.time";
 
     private TimeDebugParser parser = new TimeDebugParser(this);
@@ -32,10 +31,8 @@ class StatisticsAppender extends AppenderSkeleton implements TimeDebugParser.Par
         }
     }
 
-    //@Override
+
     protected void append(LoggingEvent event) {
-        if (event == null)
-            return;
         if (TIME_DEBUG.equals(event.getLoggerName())) {
             // it's ours
             if (event.getMessage() != null) {
