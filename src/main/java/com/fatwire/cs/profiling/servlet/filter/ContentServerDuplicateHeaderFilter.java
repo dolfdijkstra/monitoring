@@ -18,9 +18,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ContentServerDuplicateHeaderFilter implements Filter {
-    private Log log = LogFactory.getLog(this.getClass());
+    private static Log log = LogFactory.getLog(ContentServerDuplicateHeaderFilter.class);
 
-    Set<String> badHeader = new HashSet<String>();
+    private final Set<String> badHeader = new HashSet<String>();
 
     private static final String HEADER_LAST_MODIFIED = "last-modified";
 
