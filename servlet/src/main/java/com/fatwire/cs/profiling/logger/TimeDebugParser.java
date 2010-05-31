@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class TimeDebugParser {
 
-    interface ParserCallback {
+    public interface ParserCallback {
         void update(String type, String subType, long time);
     }
 

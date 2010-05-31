@@ -1,13 +1,9 @@
 package com.fatwire.cs.profiling.logger;
 
 import java.lang.management.ManagementFactory;
-import java.util.Set;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -37,10 +33,12 @@ public class Log4JAppenderLifeCycleManager implements LifeCycleManager {
                 log.setLevel(Level.DEBUG);
                 log.setAdditivity(false);
             }
+            StatisticsProvider provider=new StatisticsProvider(server);
+            TimeDebugParser parser =  new TimeDebugParser(provider);
 
-            StatisticsAppender a = new StatisticsAppender();
+            StatisticsAppender a = new StatisticsAppender(provider,parser);
             a.setName("stats");
-            a.setServer(server);
+            //a.setServer(server);
             a.activateOptions();
             log.addAppender(a);
         }
