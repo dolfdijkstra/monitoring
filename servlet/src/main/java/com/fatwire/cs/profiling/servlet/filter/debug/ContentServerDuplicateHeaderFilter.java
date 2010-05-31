@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.servlet.filter;
+package com.fatwire.cs.profiling.servlet.filter.debug;
 
 import java.io.IOException;
 import java.util.HashSet;

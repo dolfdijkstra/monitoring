@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.fatwire.cs.profiling.servlet.filter;
+package com.fatwire.cs.profiling.servlet.filter.debug;
 
 import java.io.IOException;
 import java.io.PrintWriter;

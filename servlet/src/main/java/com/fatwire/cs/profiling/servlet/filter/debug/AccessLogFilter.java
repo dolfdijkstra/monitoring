@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.servlet.filter;
+package com.fatwire.cs.profiling.servlet.filter.debug;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -10,6 +10,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.fatwire.cs.profiling.servlet.filter.RunOnceFilter;
 
 public class AccessLogFilter extends RunOnceFilter {
 
