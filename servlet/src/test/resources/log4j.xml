@@ -43,7 +43,7 @@
         <appender-ref ref="filelog" />
 
     </logger>
-    <logger name="com.fatwire.cs.profiling.servlet.filter.AccessLogFilter" additivity="false">
+    <logger name="com.fatwire.gst.web.servlet.profiling.servlet.filter.debug.AccessLogFilter" additivity="false">
         <level value="debug"></level>
         <appender-ref ref="acesslog" />
     </logger>
