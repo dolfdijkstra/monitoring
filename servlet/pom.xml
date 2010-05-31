@@ -44,6 +44,7 @@
             <artifactId>cs-core</artifactId>
             <version>7.0.2</version>
         </dependency>
+        <!-- 
         <dependency>
             <groupId>mx4j</groupId>
             <artifactId>mx4j-rimpl</artifactId>
@@ -54,6 +55,7 @@
             <artifactId>jmxremote_optional</artifactId>
             <version>1.0.1_04</version>
         </dependency>
+         -->
         <dependency>
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
