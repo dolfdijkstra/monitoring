@@ -18,6 +18,17 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
 
+
+/**
+ * Filter that intercepts any session create requests from the web-app, but lets the web-app believe that the session is created. 
+ * 
+ * In essence it reduces the session scope to the length of the request.
+ * 
+ * 
+ * @author Dolf.Dijkstra
+ * @since May 31, 2010
+ */
+
 public class SessionLessSatelliteFilter implements Filter {
     ServletContext ctx;
 
@@ -29,7 +40,9 @@ public class SessionLessSatelliteFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException {
 
-        HttpServletRequest r;
+        HttpServletRequest r = new NoSessionRequestWrapper(
+                (HttpServletRequest) request, ctx);
+        chain.doFilter(r, response);
 
     }
 
@@ -37,7 +50,7 @@ public class SessionLessSatelliteFilter implements Filter {
         ctx = filterConfig.getServletContext();
     }
 
-    static class NoSessionResponseWrapper extends HttpServletRequestWrapper {
+    static class NoSessionRequestWrapper extends HttpServletRequestWrapper {
         private HttpSession session;
 
         private ServletContext ctx;
@@ -45,9 +58,9 @@ public class SessionLessSatelliteFilter implements Filter {
         /**
          * @param response
          */
-        public NoSessionResponseWrapper(HttpServletRequest response,
+        public NoSessionRequestWrapper(HttpServletRequest request,
                 ServletContext ctx) {
-            super(response);
+            super(request);
             this.ctx = ctx;
         }
 
@@ -56,7 +69,7 @@ public class SessionLessSatelliteFilter implements Filter {
          */
         @Override
         public HttpSession getSession() {
-            return session;
+            return getSession(true);
         }
 
         /* (non-Javadoc)
@@ -68,16 +81,18 @@ public class SessionLessSatelliteFilter implements Filter {
                 return session;
             session = new HttpSession() {
 
-                Map<String, Object> attributes = new HashMap<String, Object>();
+                private Map<String, Object> attributes;
 
-                long start = System.currentTimeMillis();
+                private long start = System.currentTimeMillis();
+
+                private int interval = 300;
 
                 public Object getAttribute(String name) {
-                    return attributes.get(name);
+                    return attr().get(name);
                 }
 
                 public Enumeration getAttributeNames() {
-                    return Collections.enumeration(attributes.keySet());
+                    return Collections.enumeration(attr().keySet());
 
                 }
 
@@ -94,7 +109,7 @@ public class SessionLessSatelliteFilter implements Filter {
                 }
 
                 public int getMaxInactiveInterval() {
-                    return 300;
+                    return interval;
                 }
 
                 public ServletContext getServletContext() {
@@ -108,15 +123,20 @@ public class SessionLessSatelliteFilter implements Filter {
 
                 public Object getValue(String name) {
 
-                    return attributes.get(name);
+                    return attr().get(name);
+                }
+
+                private Map<String, Object> attr() {
+                    if (attributes == null)
+                        attributes = new HashMap<String, Object>();
+                    return attributes;
                 }
 
                 public String[] getValueNames() {
-                    return attributes.keySet().toArray(new String[0]);
+                    return attr().keySet().toArray(new String[0]);
                 }
 
                 public void invalidate() {
-                    // TODO Auto-generated method stub
 
                 }
 
@@ -125,27 +145,27 @@ public class SessionLessSatelliteFilter implements Filter {
                 }
 
                 public void putValue(String name, Object value) {
-                    attributes.put(name, value);
+                    attr().put(name, value);
 
                 }
 
                 public void removeAttribute(String name) {
-                    attributes.remove(name);
+                    attr().remove(name);
 
                 }
 
                 public void removeValue(String name) {
-                    attributes.remove(name);
+                    attr().remove(name);
 
                 }
 
                 public void setAttribute(String name, Object value) {
-                    attributes.put(name, value);
+                    attr().put(name, value);
 
                 }
 
                 public void setMaxInactiveInterval(int interval) {
-                    // TODO Auto-generated method stub
+                    this.interval = interval;
 
                 }
 
