@@ -10,6 +10,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.fatwire.cs.profiling.servlet.Util;
 
+/**
+ * 
+ * Servlet filter that prints response time to log
+ * 
+ * @author Dolf.Dijkstra
+ * 
+ */
+
 public class TimerFilter extends HttpFilter implements Filter {
 
     /**
