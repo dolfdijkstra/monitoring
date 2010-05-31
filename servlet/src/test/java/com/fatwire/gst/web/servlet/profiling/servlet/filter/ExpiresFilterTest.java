@@ -24,7 +24,7 @@ public class ExpiresFilterTest extends TestCase {
         ExpiresFilter f = new ExpiresFilter();
         try {
             int p = f.parsePeriod("120", 60);
-            Assert.fail("Should not get here");
+            Assert.fail("Should not get here " +p);
         } catch (Exception e) {
 
         }
@@ -41,7 +41,7 @@ public class ExpiresFilterTest extends TestCase {
         
         try {
             int p = f.parsePeriod("", 60);
-            Assert.fail("Should not get here");
+            Assert.fail("Should not get here "+p);
         } catch (Exception e) {
 
         }
@@ -51,7 +51,7 @@ public class ExpiresFilterTest extends TestCase {
         ExpiresFilter f = new ExpiresFilter();
         try {
             int p = f.parsePeriod(" ", 60);
-            Assert.fail("Should not get here");
+            Assert.fail("Should not get here "+p);
         } catch (Exception e) {
 
         }
