@@ -16,7 +16,7 @@ public class SummaryStatisticsAdapter implements Statistics {
     private long lastDate;
 
     public SummaryStatisticsAdapter(String name) {
-        stats = SummaryStatistics.newInstance();
+        stats = new SummaryStatistics();
         this.name = name;
 
     }
