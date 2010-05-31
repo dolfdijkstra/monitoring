@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * 
  * @author Dolf.Dijkstra
- * @since May 31, 2010
+ * 
  */
 
 public class DropConnectionHeaderFilter implements Filter {
