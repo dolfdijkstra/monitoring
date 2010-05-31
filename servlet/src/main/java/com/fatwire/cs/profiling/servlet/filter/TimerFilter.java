@@ -28,7 +28,7 @@ public class TimerFilter extends HttpFilter implements Filter {
             chain.doFilter(request, response);
         } finally {
             long end = System.currentTimeMillis();
-            log.info(Long.toString(end - start) + " for " + url);
+            log.debug(Long.toString(end - start) + " ms for " + url);
         }
 
     }
