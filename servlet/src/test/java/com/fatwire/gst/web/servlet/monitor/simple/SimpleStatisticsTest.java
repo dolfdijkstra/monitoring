@@ -1,4 +1,4 @@
-package com.fatwire.cs.monitor.simple;
+package com.fatwire.gst.web.servlet.monitor.simple;
 
 import com.fatwire.gst.web.servlet.monitor.simple.SimpleStatistics;
 

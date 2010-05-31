@@ -1,4 +1,4 @@
-package com.fatwire.cs.monitor.event.commons.math;
+package com.fatwire.gst.web.servlet.monitor.event.commons.math;
 
 import com.fatwire.gst.web.servlet.monitor.commons.math.SummaryStatisticsAdapter;
 

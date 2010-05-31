@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.servlet.filter;
+package com.fatwire.gst.web.servlet.profiling.servlet.filter;
 
 import com.fatwire.gst.web.servlet.profiling.servlet.filter.ExpiresFilter;
 

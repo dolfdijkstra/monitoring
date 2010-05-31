@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.logger;
+package com.fatwire.gst.web.servlet.profiling.logger;
 
 import com.fatwire.gst.web.servlet.profiling.logger.TimeDebugParser;
 

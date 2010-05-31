@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.servlet.jmx;
+package com.fatwire.gst.web.servlet.profiling.servlet.jmx;
 
 import com.fatwire.gst.web.servlet.profiling.servlet.jmx.NameBuilder;
 
