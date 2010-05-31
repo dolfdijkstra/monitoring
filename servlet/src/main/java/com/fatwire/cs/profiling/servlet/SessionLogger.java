@@ -33,8 +33,9 @@ public class SessionLogger implements HttpSessionAttributeListener,
     private final Log log = LogFactory.getLog(this.getClass());
 
     private final HttpSessionActivationListener distributionListener = new MyHttpSessionActivationListener();
-    
-    private class MyHttpSessionActivationListener implements HttpSessionActivationListener, java.io.Serializable {
+
+    private class MyHttpSessionActivationListener implements
+            HttpSessionActivationListener, java.io.Serializable {
 
         /**
          * 
@@ -43,14 +44,16 @@ public class SessionLogger implements HttpSessionAttributeListener,
 
         public void sessionDidActivate(final HttpSessionEvent event) {
             if (log.isDebugEnabled()) {
-                log.debug(buildDebugInfo(event.getSession() , "sessionDidActivate"));
+                log.debug(buildDebugInfo(event.getSession(),
+                        "sessionDidActivate"));
             }
 
         }
 
         public void sessionWillPassivate(final HttpSessionEvent event) {
             if (log.isDebugEnabled()) {
-                log.debug(buildDebugInfo(event.getSession() , "sessionWillPassivate"));
+                log.debug(buildDebugInfo(event.getSession(),
+                        "sessionWillPassivate"));
             }
 
         }
@@ -109,23 +112,25 @@ public class SessionLogger implements HttpSessionAttributeListener,
 
     public void sessionCreated(final HttpSessionEvent event) {
         if (log.isDebugEnabled()) {
-            log.debug(buildDebugInfo(event.getSession() , "sessionCreated"));
-            event.getSession().setAttribute("distributionListener", distributionListener);
+            log.debug(buildDebugInfo(event.getSession(), "sessionCreated"));
+            event.getSession().setAttribute("distributionListener",
+                    distributionListener);
         }
 
     }
 
     public void sessionDestroyed(final HttpSessionEvent event) {
         if (log.isDebugEnabled()) {
-            log.debug(buildDebugInfo(event.getSession() , "sessionDestroyed"));
+            log.debug(buildDebugInfo(event.getSession(), "sessionDestroyed"));
         }
 
     }
 
-    static String buildDebugInfo(HttpSession session, String method) {
-        if (session == null || method == null)
+    static String buildDebugInfo(final HttpSession session, final String method) {
+        if (session == null || method == null) {
             return "";
-        StringBuilder b =  new StringBuilder(method);
+        }
+        final StringBuilder b = new StringBuilder(method);
         b.append(": '");
         b.append(session.getId()).append("', lastAccessed: ").append(
                 new Date(session.getLastAccessedTime()) + ", created:").append(

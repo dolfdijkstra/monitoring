@@ -10,21 +10,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ContextLogger implements ServletContextListener {
-    private Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
 
     /* (non-Javadoc)
      * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.ServletContextEvent)
      */
     @SuppressWarnings("unchecked")
-    public void contextInitialized(ServletContextEvent event) {
-        ServletContext sc = event.getServletContext();
+    public void contextInitialized(final ServletContextEvent event) {
+        final ServletContext sc = event.getServletContext();
         log.info("ServerInfo: " + sc.getServerInfo());
         log.info("MajorVersion: " + sc.getMajorVersion());
         log.info("MinorVersion: " + sc.getMinorVersion());
         log.info("ServletContextName: " + sc.getServletContextName());
 
-        for (Enumeration<String> e = sc.getInitParameterNames(); e.hasMoreElements();) {
-            String name = e.nextElement();
+        for (final Enumeration<String> e = sc.getInitParameterNames(); e
+                .hasMoreElements();) {
+            final String name = e.nextElement();
             log.info("Init-Param: " + name + "=" + sc.getInitParameter(name));
 
         }
@@ -33,7 +34,7 @@ public class ContextLogger implements ServletContextListener {
     /* (non-Javadoc)
      * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
      */
-    public void contextDestroyed(ServletContextEvent event) {
+    public void contextDestroyed(final ServletContextEvent event) {
 
         log.info("contextDestroyed: " + event.toString());
 

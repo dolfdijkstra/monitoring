@@ -44,23 +44,26 @@ public class InfoServlet extends HttpServlet {
         }
     }
 
-    class Page{
-        
-        void doDTD(){
-            
+    class Page {
+
+        void doDTD() {
+
         }
-        void doHeader(){
-            
+
+        void doHeader() {
+
         }
-        
-        void doBody(){
-            
+
+        void doBody() {
+
         }
-        void doEnd(){
-            
+
+        void doEnd() {
+
         }
-        
+
     }
+
     class View {
         private final PrintWriter out;
 
@@ -105,7 +108,7 @@ public class InfoServlet extends HttpServlet {
             printTableSectionTitle(title, 2);
         }
 
-        private void printTableSectionTitle(final String title, int span)
+        private void printTableSectionTitle(final String title, final int span)
                 throws Exception {
             out.print("<tr>");
             out.print("<th colspan=\"" + span + "\">");
@@ -116,7 +119,7 @@ public class InfoServlet extends HttpServlet {
 
         private void printTableRow(final String... cellValues) throws Exception {
             out.print("<tr>");
-            for (String cell : cellValues) {
+            for (final String cell : cellValues) {
                 out.print("<td>");
                 out.print(cell);
                 out.print("</td>");
@@ -255,12 +258,10 @@ public class InfoServlet extends HttpServlet {
                     + request.getRequestedSessionId());
             printTableRow("Current Session Id", "" + session.getId());
             printTableRow("Session Created Time", ""
-                    + sdf
-                            .format(new java.util.Date((session
-                                    .getCreationTime()))));
+                    + sdf.format(new java.util.Date(session.getCreationTime())));
             printTableRow("Session Last Accessed Time", ""
-                    + sdf.format(new java.util.Date((session
-                            .getLastAccessedTime()))));
+                    + sdf.format(new java.util.Date(session
+                            .getLastAccessedTime())));
             printTableRow("Session Max Inactive Interval Seconds", ""
                     + session.getMaxInactiveInterval());
 
