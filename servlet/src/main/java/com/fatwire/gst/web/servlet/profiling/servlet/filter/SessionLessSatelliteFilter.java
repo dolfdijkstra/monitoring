@@ -16,7 +16,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
+
 
 
 /**
@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSessionContext;
  * @author Dolf.Dijkstra
  * @since May 31, 2010
  */
+
 
 public class SessionLessSatelliteFilter implements Filter {
     ServletContext ctx;
@@ -91,6 +92,7 @@ public class SessionLessSatelliteFilter implements Filter {
                     return attr().get(name);
                 }
 
+                @SuppressWarnings("unchecked")
                 public Enumeration getAttributeNames() {
                     return Collections.enumeration(attr().keySet());
 
@@ -117,7 +119,8 @@ public class SessionLessSatelliteFilter implements Filter {
                     return ctx;
                 }
 
-                public HttpSessionContext getSessionContext() {
+                @SuppressWarnings("deprecation")
+                public javax.servlet.http.HttpSessionContext getSessionContext() {
                     return null;
                 }
 
