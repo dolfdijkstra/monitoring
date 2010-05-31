@@ -32,8 +32,9 @@ public class LoggerFilter extends HttpFilter implements Filter {
      * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
      *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
-    public void doFilter(final HttpServletRequest request, final HttpServletResponse response,
-            final FilterChain chain) throws IOException, ServletException {
+    public void doFilter(final HttpServletRequest request,
+            final HttpServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
 
         String sessionid;
         if (request.getSession(false) != null) {
@@ -69,9 +70,11 @@ public class LoggerFilter extends HttpFilter implements Filter {
      * @param elapsed
      * @param url
      */
-    protected void log(final String session, final long elapsed, final String url) {
+    protected void log(final String session, final long elapsed,
+            final String url) {
         if (log.isInfoEnabled()) {
-            log.info(session + "|" + Long.toString(elapsed) + " ms for " + url);
+            log.info(session + "|" + url + " in " + Long.toString(elapsed)
+                    + " ms");
         }
 
     }
