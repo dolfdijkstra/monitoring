@@ -44,16 +44,18 @@ public class MeasurementTest extends TestCase {
 
     }
 
-    public void XtestBlock() {
+    public void _testBlock() {
         Measurement m = new Measurement();
         final Object o = new Object();
+        final Thread current = Thread.currentThread();
         Thread x = new Thread() {
             @Override
             public void run() {
                 System.out.println("started");
                 synchronized (o) {
-                    System.out.println("in synchronized block");
                     
+                    System.out.println("in synchronized block");
+                    System.out.println("state of starting thread "+current.getState());
                     System.out.println("notifyAll");
                     o.notifyAll();
                 }
@@ -67,6 +69,7 @@ public class MeasurementTest extends TestCase {
             x.start();
             
             try {
+                System.out.println("state of notifying thread "+x.getState());
                 System.out.println("waiting");
                 o.wait();
                 System.out.println("done waiting");
@@ -82,8 +85,8 @@ public class MeasurementTest extends TestCase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(1, m.getBlockCountDelta());
-        Assert.assertEquals(0, m.getWaitCountDelta());
+        Assert.assertEquals(0, m.getBlockCountDelta());
+        Assert.assertEquals(1, m.getWaitCountDelta());
     }
 
     public void testMeasurementPerformance() {
