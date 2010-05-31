@@ -5,6 +5,8 @@ import java.lang.management.ThreadMXBean;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fatwire.gst.web.servlet.profiling.servlet.jmx.Measurement;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 

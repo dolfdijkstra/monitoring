@@ -1,5 +1,7 @@
 package com.fatwire.cs.profiling.servlet.filter;
 
+import com.fatwire.gst.web.servlet.profiling.servlet.filter.ExpiresFilter;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 

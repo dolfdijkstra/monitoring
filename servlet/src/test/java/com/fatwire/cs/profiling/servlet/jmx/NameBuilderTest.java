@@ -1,5 +1,7 @@
 package com.fatwire.cs.profiling.servlet.jmx;
 
+import com.fatwire.gst.web.servlet.profiling.servlet.jmx.NameBuilder;
+
 import junit.framework.TestCase;
 
 public class NameBuilderTest extends TestCase {

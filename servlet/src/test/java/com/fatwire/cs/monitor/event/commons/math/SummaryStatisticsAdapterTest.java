@@ -1,6 +1,6 @@
 package com.fatwire.cs.monitor.event.commons.math;
 
-import com.fatwire.cs.monitor.commons.math.SummaryStatisticsAdapter;
+import com.fatwire.gst.web.servlet.monitor.commons.math.SummaryStatisticsAdapter;
 
 import junit.framework.TestCase;
 

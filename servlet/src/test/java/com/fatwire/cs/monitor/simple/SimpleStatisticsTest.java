@@ -1,5 +1,7 @@
 package com.fatwire.cs.monitor.simple;
 
+import com.fatwire.gst.web.servlet.monitor.simple.SimpleStatistics;
+
 import junit.framework.TestCase;
 
 public class SimpleStatisticsTest extends TestCase {

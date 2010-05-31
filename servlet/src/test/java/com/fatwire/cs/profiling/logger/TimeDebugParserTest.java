@@ -1,5 +1,7 @@
 package com.fatwire.cs.profiling.logger;
 
+import com.fatwire.gst.web.servlet.profiling.logger.TimeDebugParser;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
