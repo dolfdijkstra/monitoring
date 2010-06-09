@@ -2,11 +2,6 @@ package com.fatwire.gst.web.status;
 
 import java.lang.management.ManagementFactory;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -14,10 +9,16 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.fatwire.gst.web.status.jmx.StatusCounter;
 
 public class StatusRequestListener implements ServletRequestListener,
         ServletContextListener {
+
+    private Log log = LogFactory.getLog(StatusRequestListener.class);
+
     private RequestCounter requestCounter;
 
     private ObjectName name;
@@ -53,10 +54,8 @@ public class StatusRequestListener implements ServletRequestListener,
         requestCounter = null;
         try {
             ManagementFactory.getPlatformMBeanServer().unregisterMBean(name);
-        } catch (InstanceNotFoundException e) {
-            sce.getServletContext().log(e.getMessage(), e);
-        } catch (MBeanRegistrationException e) {
-            sce.getServletContext().log(e.getMessage(), e);
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
         }
 
     }
@@ -66,19 +65,11 @@ public class StatusRequestListener implements ServletRequestListener,
                 .getServletContextName());
 
         try {
-            name = new ObjectName("com.fatwire.cs:type=RequestCounter");
+            name = new ObjectName("com.fatwire.gst:type=RequestCounter");
             ManagementFactory.getPlatformMBeanServer().registerMBean(
                     new StatusCounter(requestCounter), name);
-        } catch (InstanceAlreadyExistsException e) {
-            sce.getServletContext().log(e.getMessage(), e);
-        } catch (MBeanRegistrationException e) {
-            sce.getServletContext().log(e.getMessage(), e);
-        } catch (NotCompliantMBeanException e) {
-            sce.getServletContext().log(e.getMessage(), e);
-        } catch (MalformedObjectNameException e) {
-            sce.getServletContext().log(e.getMessage(), e);
-        } catch (NullPointerException e) {
-            sce.getServletContext().log(e.getMessage(), e);
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
         }
 
     }
