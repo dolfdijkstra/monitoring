@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.concurrent;
+package com.fatwire.gst.web.status;
 
 import com.fatwire.gst.web.status.TimeFormat;
 
