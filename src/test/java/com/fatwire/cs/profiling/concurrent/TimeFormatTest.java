@@ -1,5 +1,7 @@
 package com.fatwire.cs.profiling.concurrent;
 
+import com.fatwire.gst.web.status.TimeFormat;
+
 import junit.framework.TestCase;
 
 public class TimeFormatTest extends TestCase {

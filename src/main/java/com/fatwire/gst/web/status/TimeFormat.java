@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.concurrent;
+package com.fatwire.gst.web.status;
 
 public class TimeFormat {
     static final long MILLI = 1000000L;

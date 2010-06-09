@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.concurrent.jmx;
+package com.fatwire.gst.web.status.jmx;
 
 
 public interface StatusCounterMBean {

@@ -1,6 +1,6 @@
-package com.fatwire.cs.profiling.concurrent.jmx;
+package com.fatwire.gst.web.status.jmx;
 
-import com.fatwire.cs.profiling.concurrent.RequestCounter;
+import com.fatwire.gst.web.status.RequestCounter;
 
 public class StatusCounter implements StatusCounterMBean {
     private final RequestCounter delegate;

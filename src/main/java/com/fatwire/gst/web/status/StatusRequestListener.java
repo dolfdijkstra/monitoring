@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.concurrent;
+package com.fatwire.gst.web.status;
 
 import java.lang.management.ManagementFactory;
 
@@ -14,7 +14,7 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 
-import com.fatwire.cs.profiling.concurrent.jmx.StatusCounter;
+import com.fatwire.gst.web.status.jmx.StatusCounter;
 
 public class StatusRequestListener implements ServletRequestListener,
         ServletContextListener {

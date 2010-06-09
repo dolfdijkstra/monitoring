@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.concurrent;
+package com.fatwire.gst.web.status;
 
 import java.lang.Thread.State;
 import java.lang.ref.WeakReference;

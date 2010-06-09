@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.concurrent.filter;
+package com.fatwire.gst.web.status.filter;
 
 import java.io.IOException;
 
@@ -7,8 +7,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.fatwire.cs.profiling.concurrent.RequestCounter;
 import com.fatwire.gst.web.servlet.profiling.servlet.filter.RunOnceFilter;
+import com.fatwire.gst.web.status.RequestCounter;
 
 public class RequestCounterFilter extends RunOnceFilter {
     private RequestCounter requestCounter;

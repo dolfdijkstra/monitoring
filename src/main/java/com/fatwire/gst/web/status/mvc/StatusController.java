@@ -1,4 +1,4 @@
-package com.fatwire.cs.profiling.concurrent.mvc;
+package com.fatwire.gst.web.status.mvc;
 
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
@@ -21,9 +21,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.Controller;
 
-import com.fatwire.cs.profiling.concurrent.RequestCounter;
-import com.fatwire.cs.profiling.concurrent.RequestInfo;
-import com.fatwire.cs.profiling.concurrent.TimeFormat;
+import com.fatwire.gst.web.status.RequestCounter;
+import com.fatwire.gst.web.status.RequestInfo;
+import com.fatwire.gst.web.status.TimeFormat;
 
 public class StatusController implements Controller, ServletContextAware {
 
