@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fatwire.cs.profiling.concurrent.RequestCounter;
-import com.fatwire.cs.profiling.servlet.filter.RunOnceFilter;
+import com.fatwire.gst.web.servlet.profiling.servlet.filter.RunOnceFilter;
 
 public class RequestCounterFilter extends RunOnceFilter {
     private RequestCounter requestCounter;
