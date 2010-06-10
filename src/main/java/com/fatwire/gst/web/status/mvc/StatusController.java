@@ -154,7 +154,7 @@ public class StatusController implements Controller, ServletContextAware {
          */
         public void render(final Map map, final HttpServletRequest request,
                 final HttpServletResponse response) throws Exception {
-            final long t = System.nanoTime();
+            //final long t = System.nanoTime();
             response.setContentType("text/html; charset=\"UTF-8\"");
             final PrintWriter writer = response.getWriter();
             writer
@@ -182,7 +182,7 @@ public class StatusController implements Controller, ServletContextAware {
             writer.print("</div>");
             final Collection<RequestInfo> c = requestCounter
                     .getCurrentExecutingOperations();
-            writer.print("<p>" + (System.nanoTime() - t) / 1000 + "us </p>");
+            //writer.print("<p>" + (System.nanoTime() - t) / 1000 + "us </p>");
             if (requestInfo) {
                 writer.print("<table><tr><th>");
                 writer.print("thread");
@@ -233,7 +233,7 @@ public class StatusController implements Controller, ServletContextAware {
                 writer.println("</table>");
             }
 
-            writer.print("<p>" + (System.nanoTime() - t) / 1000 + "us </p>");
+            //writer.print("<p>" + (System.nanoTime() - t) / 1000 + "us </p>");
             writer.print("</body></html>");
             writer.flush();
         }
