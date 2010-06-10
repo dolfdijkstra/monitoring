@@ -72,7 +72,7 @@ public class StatusRequestListener implements ServletRequestListener,
                 .getServletContextName());
 
         try {
-            name = new ObjectName("com.fatwire.gst:type=RequestCounter");
+            name = new ObjectName("com.fatwire.gst.web:type=RequestCounter");
             ManagementFactory.getPlatformMBeanServer().registerMBean(
                     new StatusCounter(requestCounter), name);
         } catch (Throwable e) {

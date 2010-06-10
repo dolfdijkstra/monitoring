@@ -224,11 +224,11 @@ public class StatusController implements Controller, ServletContextAware {
                 writer.print("<tr><td>method<td><td>the http method</td></tr>");
                 writer
                         .print("<tr><td>uri<td><td>short uri of last request</td></tr>");
-                writer.print("<tr><td>LST<td><td>Last Start Yime</td></tr>");
+                writer.print("<tr><td>LST<td><td>time at the last start (Last Start Time)</td></tr>");
                 writer
                         .print("<tr><td>TSLS<td><td>time since last start</td></tr>");
                 writer
-                        .print("<tr><td>State<td><td>The current thread state for this request</td></tr>");
+                        .print("<tr><td>State<td><td>the current thread state for this request</td></tr>");
 
                 writer.println("</table>");
             }
