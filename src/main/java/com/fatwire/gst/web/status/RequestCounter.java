@@ -88,16 +88,19 @@ public class RequestCounter implements
 
     public void start(final HttpServletRequest request) {
         final RequestInfo current = threadLocal.get();
+        if (current.isRunning())
+            throw new IllegalStateException("Can't call start twice");
         current.start(request);
         concurrencyCounter.incrementAndGet();
         counter.incrementAndGet();
 
     }
-/**
- * signal end of the request
- * 
- * @return the execution time for this requets in nano seconds
- */
+
+    /**
+     * signal end of the request
+     * 
+     * @return the execution time for this requets in nano seconds
+     */
     public long end(final HttpServletRequest request) {
         final RequestInfo current = threadLocal.get();
         if (current.isRunning()) {

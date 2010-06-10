@@ -14,6 +14,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.fatwire.gst.web.status.jmx.StatusCounter;
 
+
+/**
+ * Implements JMX enablement of the StatusCounter.
+ * @author Dolf.Dijkstra
+ * @since Jun 10, 2010
+ */
+
 public class StatusRequestListener implements ServletRequestListener,
         ServletContextListener {
 
