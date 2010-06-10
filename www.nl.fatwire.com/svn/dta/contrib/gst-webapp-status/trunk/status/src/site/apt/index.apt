@@ -1,0 +1,110 @@
+Status Tool
+
+  The tool provides information on the current executing requests. It is similar to Apache httpd's mod_status.
+  
+[images/status-screenshot.png] 
+
+
+Usage
+
+  The tools isd accessable via a url and JMX.
+  
+  The urls are 
+
+  * <<<http://host:port/domain/status>>>: A html view as in the screenshot above 
+  
+  * <<<http://host:port/domain/status?refresh=5>>>: The same html view, reloading each 5 seconds
+
+  * <<<http://host:port/domain/status?auto>>>: A plain text view, intent is that this is a parsebable report.
+
+  * <<<http://host:port/domain/status?auto&extendedInfo>>>: Same report as above, with per request info. "extendedInfo" the default.
+
+
+* The report
+
+  The report lists several columns
+
+  * thread: name of the thread
+
+  * counter: number of invocations by this thread
+
+  * R: is currently running?
+
+  * time: execution time of last request in relavent precision. 
+
+  * remote:	the remote host and port  of the last or running request
+
+  * method:	the http method of the last or running request
+
+  * uri: short uri of last or running request
+
+  * LST: Last Start Time
+
+  * TSLS: time that has passed since last start, as an indication how long the request is running or how long the thread is idle.
+
+  * State: The current thread state for this request
+
+
+* JMX
+
+  The JMX view is limited, it only lists the current number of exeuting requests and the total number of handled requests.
+  
+  Use a tool like JConsole to view the JMX Beans. 
+
+[images/jmx-screenshot.png]
+  
+  
+Deployment
+
+
+  To deploy the tool on top of ContentServer you need to add spring-webmvc-2.5.5.jar and spring-context-2.5.5 to WEB-INF/lib.
+  
+  Next you need to make some changes to web.xml. 
+  
+----------
+<context-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>/WEB-INF/applicationContext.xml,classpath:com/fatwire/gst/web/status/applicationContext-status.xml</param-value>
+</context-param>
+
+<filter>
+	<filter-name>RequestCounterFilter</filter-name>
+	<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	<init-param>
+		<param-name>targetBeanName</param-name>
+		<param-value>requestCounterFilter</param-value>
+	</init-param>
+</filter>
+
+<filter-mapping>
+	<filter-name>RequestCounterFilter</filter-name>
+	<url-pattern>/*</url-pattern>
+	<dispatcher>REQUEST</dispatcher>
+</filter-mapping>
+
+<!-- The  StatusRequestListener must be placed AFTER the org.springframework.web.context.ContextLoaderListener. 
+     This listener enables the JMX support. 
+-->
+
+<listener>
+        <listener-class>com.fatwire.gst.web.status.StatusRequestListener</listener-class>
+</listener>
+
+<servlet>
+	<servlet-name>status</servlet-name>
+	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	<load-on-startup>1</load-on-startup>
+	<init-param>
+	<param-name>contextConfigLocation</param-name>
+	<param-value>classpath:com/fatwire/gst/web/status/status-servlet.xml</param-value>
+	</init-param>
+</servlet>
+
+<servlet-mapping>
+	<servlet-name>status</servlet-name>
+	<url-pattern>/status/*</url-pattern>
+</servlet-mapping>
+
+-----------------
+
+
