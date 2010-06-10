@@ -1,0 +1,68 @@
+
+Usage
+
+  http://localhost:8080/cs/status
+  
+  http://localhost:8080/cs/status?refresh=5
+
+  http://localhost:8080/cs/status?auto
+
+  http://localhost:8080/cs/status?auto&extendedInfo
+
+
+
+Deployment
+
+
+  Add spring-webmvc-2.5.5.jar and spring-context-2.5.5 to WEB-INF/lib
+  
+  Changes to web.xml
+  
+----------
+<context-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>/WEB-INF/applicationContext.xml,classpath:com/fatwire/gst/web/status/applicationContext-status.xml</param-value>
+</context-param>
+
+<filter>
+	<filter-name>RequestCounterFilter</filter-name>
+	<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	<init-param>
+		<param-name>targetBeanName</param-name>
+		<param-value>requestCounterFilter</param-value>
+	</init-param>
+</filter>
+
+<filter-mapping>
+	<filter-name>RequestCounterFilter</filter-name>
+	<url-pattern>/*</url-pattern>
+	<dispatcher>REQUEST</dispatcher>
+</filter-mapping>
+
+<!-- The  StatusRequestListener must be placed AFTER the 
+<<<org.springframework.web.context.ContextLoaderListener>>>
+-->
+
+<listener>
+        <listener-class>com.fatwire.gst.web.status.StatusRequestListener</listener-class>
+</listener>
+
+<servlet>
+	<servlet-name>status</servlet-name>
+	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	<load-on-startup>1</load-on-startup>
+	<init-param>
+	<param-name>contextConfigLocation</param-name>
+	<param-value>classpath:com/fatwire/gst/web/status/status-servlet.xml</param-value>
+	</init-param>
+</servlet>
+
+<servlet-mapping>
+	<servlet-name>status</servlet-name>
+	<url-pattern>/status/*</url-pattern>
+</servlet-mapping>
+
+-----------------
+
+
+
